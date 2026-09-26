@@ -1,0 +1,90 @@
+================================================================
+  LES PROJETS DES STAGIAIRES — INSFP EL HIDHAB 2026
+  Application de gestion scolaire
+  © 2026 Professeur Douadi Nabil — Tous droits réservés
+================================================================
+
+CONTENU DE CE DOSSIER
+---------------------
+1. Les projets des stagiaires INSFP EL HIDHAB 2026.html
+     -> L'application. Double-cliquez ce fichier pour l'ouvrir.
+
+2. LICENCE.md
+     -> Licence d'utilisation complète (texte officiel).
+
+3. LISEZ-MOI.txt
+     -> Ce fichier.
+
+
+DEMARRAGE
+---------
+1. Double-cliquez sur le fichier HTML (aucune installation,
+   aucun programme supplémentaire : il suffit d'un navigateur :
+   Chrome, Edge ou Firefox).
+2. Identifiants administrateur :
+     Identifiant : Profdouadi
+     Mot de passe : 08082012
+3. Les fichiers de données sont enregistrés automatiquement dans
+   le navigateur (localStorage) sur CETTE machine.
+   -> IMPORTANT : toujours utiliser le même navigateur et le même
+      ordinateur, sinon les données ne seront pas retrouvées.
+
+
+LICENCE
+-------
+Cette application est la propriété exclusive du
+Professeur Douadi Nabil — INSFP El Hidhab, Sétif.
+
+Elle est conçue et réservée à l'usage de l'établissement destinataire.
+La copie, la modification, la revente, la cession à un tiers et
+l'utilisation dans un autre projet sont strictement interdites
+sauf autorisation écrite préalable de l'auteur.
+
+Le détail des conditions figure dans le fichier LICENCE.md et
+dans le bouton « Licence » de l'application.
+
+
+PROTECTION CONTRE LE PIRATAGE (à connaître de l'auteur)
+---------------------------------------------------------
+Le fichier HTML est protégé par :
+  - un filigrane affiché en permanence à l'écran et à l'impression ;
+  - 13 marques de propriété intellectuelle intégrées dans le code ;
+  - un contrôle d'intégrité au démarrage : si une marque est
+    supprimée, l'application affiche un écran de blocage ;
+  - le blocage du clic droit, de F12, de Ctrl+U / Ctrl+S / Ctrl+C ;
+  - un message d'avertissement en cas de tentative.
+
+ATTENTION SI VOUS MODIFIEZ LE FICHIER (auteur uniquement) :
+  Ne supprimez surtout pas les lignes de la forme :
+      <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  Il y en a 13 dans le fichier. Si vous en retirez une seule,
+  l'application se bloquera au démarrage au lieu de démarrer.
+  Si vous en ajoutez une, augmentez aussi la valeur
+  PROT_MARQUEURS_ATTENDUS dans le code.
+
+Pour déverrouiller temporairement l'affichage du filigrane
+pendant une impression, retirez la classe « no-wm » du body
+(puis remettez-la après).
+
+Pour désactiver complètement la protection (usage personnel
+de l'auteur uniquement) : supprimez l'appel à protVerrouiller()
+et à protVerifier() dans le bloc « PROTECTION » en haut du
+script.
+
+
+CONSEIL JURIDIQUE
+-----------------
+Une application HTML exécutée dans un navigateur ne peut pas être
+techniquement protégée à 100 % : une personne expérimentée peut
+toujours lire le code. Les mesures ci-dessus sont des
+dissuasifs. Pour une protection juridique forte, conservez une
+copie horodatée du code (dépôt ONDA, OpenTimestamps) et faites
+enregistrer la licence auprès des autorités compétentes.
+
+
+CONTACT
+-------
+Professeur Douadi Nabil
+INSFP El Hidhab, Sétif
+Salutation82nobl@gmail.com
+Tél. : +213 774 89 20 34 / +213 659 97 87 55
