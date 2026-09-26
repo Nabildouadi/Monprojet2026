@@ -23,7 +23,9 @@ DEMARRAGE
    Chrome, Edge ou Firefox).
 2. Identifiants administrateur :
      Identifiant : Profdouadi
-     Mot de passe : 08082012
+     Mot de passe : Mot de passe defini par le proprietaire de
+     l'application (conserve hors du fichier, non lisible
+     dans le code source).
 3. Les fichiers de données sont enregistrés automatiquement dans
    le navigateur (localStorage) sur CETTE machine.
    -> IMPORTANT : toujours utiliser le même navigateur et le même
