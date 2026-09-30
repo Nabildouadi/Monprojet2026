@@ -84,7 +84,7 @@
       position: relative;
       width: 100px;
       height: 100px;
-      border-radius: 50%;
+      border-radius: 16px;
       overflow: hidden;
       border: 2.5px solid var(--primary);
       background: #fff;
@@ -102,7 +102,7 @@
       box-shadow: var(--shadow-hover);
     }
 
-    .header-logo img { width: 100%; height: 100%; object-fit: contain; padding: 5px; display: block; }
+    .header-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .header-logo .logo-placeholder {
       font-size: 2.2rem;
@@ -128,8 +128,8 @@
 
     .header-logo .logo-change span { font-size: 0.62rem; line-height: 1.2; }
 
-    body.admin-logo .header-logo { cursor: pointer; }
-    body.admin-logo .header-logo:hover .logo-change { opacity: 1; }
+    body:not(.locked) .header-logo { cursor: pointer; }
+    body:not(.locked) .header-logo:hover .logo-change { opacity: 1; }
 
     .header-profil { display: flex; flex-direction: column; align-items: center; }
 
@@ -615,41 +615,18 @@
       border-radius: 50%;
       overflow: hidden;
       background: #fff;
-      border: 3px solid rgba(255,255,255,.9);
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 15px rgba(0,0,0,.3);
-      cursor: default;
-      position: relative;
+      cursor: pointer;
       transition: transform .3s, box-shadow .3s;
       flex-shrink: 0;
     }
 
-    body.admin-logo .accueil-logo { cursor: pointer; }
-    body.admin-logo .accueil-logo:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,.4); }
-    .accueil-logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; display: block; }
+    .accueil-logo:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,.4); }
+    .accueil-logo img { width: 100%; height: 100%; object-fit: cover; }
     .accueil-logo .accueil-logo-placeholder { font-size: 2.6rem; color: var(--primary); }
-
-    .accueil-logo .logo-change {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: .2rem;
-      background: rgba(15,23,42,.62);
-      color: #fff;
-      font-size: .8rem;
-      font-weight: 700;
-      opacity: 0;
-      transition: opacity .25s;
-      text-align: center;
-      pointer-events: none;
-    }
-    .accueil-logo .logo-change span { font-size: .58rem; line-height: 1.2; }
-    body.admin-logo .accueil-logo:hover .logo-change { opacity: 1; }
 
     .accueil-header-center { text-align: center; flex: 1; padding: 0 20px; }
 
@@ -680,12 +657,6 @@
     }
     .galerie-head i { color: #4fc3f7; }
     .galerie-head .galerie-hint { margin-left: auto; font-size: .7rem; font-weight: 600; color: rgba(255,255,255,.65); text-transform: none; letter-spacing: 0; }
-    body:not(.admin-logo) .gal-admin { display: none !important; }
-    body.admin-logo .gal-visiteur { display: none !important; }
-    body:not(.admin-logo) .gal-item { cursor: default; }
-    body:not(.admin-logo) .gal-item .gal-badge { display: none; }
-    body:not(.admin-logo) .gal-item:hover { transform: none; box-shadow: none; border-color: rgba(79,195,247,.35); }
-    body:not(.admin-logo) .gal-item:hover::after { animation: none; }
     .galerie {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
     }
@@ -1570,10 +1541,9 @@
     </div>
     <header class="accueil-header">
       <div class="accueil-header-top">
-        <div class="accueil-logo" id="accueilLogoLeft" onclick="changeAccueilLogo('left')" title="Logo gauche — modification réservée à l'administrateur">
+        <div class="accueil-logo" id="accueilLogoLeft" onclick="changeAccueilLogo('left')" title="Cliquer pour modifier le logo gauche">
           <div class="accueil-logo-placeholder"><i class="fas fa-landmark"></i></div>
           <img id="accueilLogoLeftImg" alt="Logo gauche" style="display:none;">
-          <div class="logo-change"><i class="fas fa-camera"></i><span>Admin :<br>changer</span></div>
           <input type="file" id="accueilLogoLeftInput" accept="image/*" style="display:none" onchange="accueilLogoChanged('left',this)">
         </div>
         <div class="accueil-header-center">
@@ -1581,10 +1551,9 @@
           <div class="accueil-ministere" data-lang-key="ministere">Ministère De La Formation et de l'enseignement Professionnels</div>
           <div class="accueil-institut" data-lang-key="institut">Institut National Spécialisé de la formation Professionnelle (ELHidhab)</div>
         </div>
-        <div class="accueil-logo" id="accueilLogoRight" onclick="changeAccueilLogo('right')" title="Logo droit — modification réservée à l'administrateur">
+        <div class="accueil-logo" id="accueilLogoRight" onclick="changeAccueilLogo('right')" title="Cliquer pour modifier le logo droit">
           <div class="accueil-logo-placeholder"><i class="fas fa-graduation-cap"></i></div>
           <img id="accueilLogoRightImg" alt="Logo Professeur Douadi Nabil" style="display:none;">
-          <div class="logo-change"><i class="fas fa-camera"></i><span>Admin :<br>changer</span></div>
           <input type="file" id="accueilLogoRightInput" accept="image/*" style="display:none" onchange="accueilLogoChanged('right',this)">
         </div>
       </div>
@@ -1597,9 +1566,8 @@
         <div class="galerie-box">
           <div class="galerie-head">
             <i class="fas fa-images"></i> <span>Galerie photos</span>
-            <span class="galerie-hint gal-admin">Admin : cliquer sur une photo pour la changer</span>
-            <span class="galerie-hint gal-visiteur"><i class="fas fa-lock"></i> Photos gérées par l'administrateur</span>
-            <button class="btn btn-secondary gal-admin" style="padding:.2rem .55rem;font-size:.66rem;" onclick="galToutEffacer()"><i class="fas fa-eraser"></i> Effacer</button>
+            <span class="galerie-hint">Admin : cliquer sur une photo pour la changer</span>
+            <button class="btn btn-secondary" style="padding:.2rem .55rem;font-size:.66rem;" onclick="galToutEffacer()"><i class="fas fa-eraser"></i> Effacer</button>
           </div>
           <div class="galerie" id="galerie">
             <div class="gal-item" onclick="galChanger(0)"><i class="fas fa-image"></i><span class="gal-num">1</span><span class="gal-badge"><i class="fas fa-camera"></i></span></div>
@@ -3048,27 +3016,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       });
     }
 
-    // ===== Droits administrateur (logos, galerie, photos de l'accueil) =====
-    // Seul l'administrateur connecté (session "admin") peut modifier ces éléments.
-    function estAdmin() {
-      return sessionStorage.getItem(SESSION_TYPE_KEY) === 'admin'
-        && !document.body.classList.contains('locked');
-    }
-
-    function majDroitsAdmin() {
-      document.body.classList.toggle('admin-logo', estAdmin());
-    }
-
-    function exigerAdmin(message) {
-      if (estAdmin()) return true;
-      showToast(message || 'Modification réservée à l\'administrateur', 'fas fa-shield-halved', true);
-      return false;
-    }
-
-    const MSG_LOGO = 'Modification des logos réservée à l\'administrateur';
-    const MSG_GALERIE = 'Galerie photos : modification réservée à l\'administrateur';
-
-    // ===== Galerie 4 photos : modification réservée à l'administrateur =====
+    // ===== Galerie 4 photos modifiables par l'admin =====
     const GALERIE_KEY = 'ps_galerie_accueil';
     let galerie = ['', '', '', ''];
     let galIndex = 0;
@@ -3089,17 +3037,11 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function galChanger(i) {
-      if (!exigerAdmin(MSG_GALERIE)) return;
       galIndex = i;
       document.getElementById('galInput').click();
     }
 
     function galFichierChoisi(input) {
-      if (!estAdmin()) {
-        input.value = '';
-        showToast(MSG_GALERIE, 'fas fa-shield-halved', true);
-        return;
-      }
       const f = input.files && input.files[0];
       if (!f) return;
       const reader = new FileReader();
@@ -3140,7 +3082,6 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function galToutEffacer() {
-      if (!exigerAdmin(MSG_GALERIE)) return;
       if (!confirm('Effacer les 4 photos de la galerie ?')) return;
       galerie = ['', '', '', ''];
       galerieSauver();
@@ -3148,9 +3089,9 @@ const STU_KEY = 'ps_stagiaire_tel';
       showToast('Galerie effacée', 'fas fa-eraser');
     }
 
-    // ===== Logos : forme carrée + modification réservée à l'administrateur =====
+    // ===== Logos modifiables par l'administrateur =====
     function changeLogo(side) {
-      if (!exigerAdmin(MSG_LOGO)) return;
+      if (document.body.classList.contains('locked')) return;
       document.getElementById('logo' + side + 'File').click();
     }
 
@@ -3160,11 +3101,6 @@ const STU_KEY = 'ps_stagiaire_tel';
         const side = target.id.replace('logo', '').replace('File', '');
         const file = target.files[0];
         if (!file) return;
-        if (!estAdmin()) {
-          target.value = '';
-          showToast(MSG_LOGO, 'fas fa-shield-halved', true);
-          return;
-        }
         const reader = new FileReader();
         reader.onload = function(ev) {
           const dataUrl = ev.target.result;
@@ -3172,8 +3108,6 @@ const STU_KEY = 'ps_stagiaire_tel';
           const img = document.getElementById('logo' + side + 'Img');
           img.src = dataUrl;
           img.style.display = 'block';
-          const j = document.getElementById('accueilLogo' + side + 'Img');
-          if (j) { j.src = dataUrl; j.style.display = 'block'; }
           showToast('Logo ' + (side === 'Left' ? 'gauche' : 'droit') + ' mis à jour', 'fas fa-images');
         };
         reader.readAsDataURL(file);
@@ -3206,26 +3140,18 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function changeAccueilLogo(side) {
-      if (!exigerAdmin(MSG_LOGO)) return;
       const input = document.getElementById('accueilLogo' + (side === 'left' ? 'Left' : 'Right') + 'Input');
       if (input) input.click();
     }
 
     function accueilLogoChanged(side, input) {
       if (!input.files || !input.files[0]) return;
-      if (!estAdmin()) {
-        input.value = '';
-        showToast(MSG_LOGO, 'fas fa-shield-halved', true);
-        return;
-      }
       const reader = new FileReader();
       const key = 'ps_logo_' + (side === 'left' ? 'Left' : 'Right');
       reader.onload = function(ev) {
         localStorage.setItem(key, ev.target.result);
         const img = document.getElementById('accueilLogo' + (side === 'left' ? 'Left' : 'Right') + 'Img');
         if (img) { img.src = ev.target.result; img.style.display = 'block'; }
-        const j = document.getElementById('logo' + (side === 'left' ? 'Left' : 'Right') + 'Img');
-        if (j) { j.src = ev.target.result; j.style.display = 'block'; }
         showToast('Logo ' + (side === 'left' ? 'gauche' : 'droit') + ' modifié', 'fas fa-image');
       };
       reader.readAsDataURL(input.files[0]);
@@ -3309,7 +3235,6 @@ const STU_KEY = 'ps_stagiaire_tel';
 
     function appliquerRole() {
       const stu = estStagiaire();
-      majDroitsAdmin();
       document.body.classList.toggle('role-stu', stu);
       document.querySelectorAll('#appPages .page-tab').forEach(function(t) {
         const roles = (t.dataset.role || 'prof').split(/\s+/);
@@ -3367,7 +3292,6 @@ const STU_KEY = 'ps_stagiaire_tel';
       sessionStorage.removeItem(STU_KEY);
       document.body.classList.add('locked');
       document.body.classList.add('show-accueil');
-      majDroitsAdmin();
       document.getElementById('loginUser').value = '';
       document.getElementById('loginPass').value = '';
       document.getElementById('stuTel').value = '';
@@ -6020,7 +5944,6 @@ const STU_KEY = 'ps_stagiaire_tel';
     // ===== Lancement =====
     window.addEventListener('load', function() {
       updateHeaderDateTime();
-      majDroitsAdmin();
       restoreLogos();
       renderAccueilLogos();
       galerieCharger();
