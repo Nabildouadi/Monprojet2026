@@ -1637,7 +1637,7 @@
           </div>
           <div class="login-field">
             <label data-lang-key="login-pass"><i class="fas fa-lock"></i> Mot de passe</label>
-            <input type="password" id="loginPass" placeholder="••••••••">
+            <input type="password" id="loginPass" placeholder="••••••••" autocomplete="new-password">
           </div>
           <div class="login-error" id="loginError"></div>
           <button class="btn btn-primary btn-block" onclick="handleLogin()" data-lang-key="login-btn"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
@@ -1655,11 +1655,10 @@
           </div>
           <div class="login-field">
             <label data-lang-key="login-stu-pass"><i class="fas fa-key"></i> Mot de passe (4 chiffres)</label>
-            <input type="text" id="stuPass" placeholder="————" maxlength="4" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" onkeydown="if(event.key==='Enter') stuConnexion()">
+            <input type="text" id="stuPass" placeholder="————" maxlength="4" inputmode="numeric" autocomplete="new-password" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" onkeydown="if(event.key==='Enter') stuConnexion()">
           </div>
           <div class="login-error" id="stuError"></div>
           <button class="btn btn-success btn-block" onclick="stuConnexion()" data-lang-key="login-btn"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
-          <p class="login-hint" data-lang-key="login-stu-hint">Saisissez votre <strong>numéro de téléphone</strong> puis votre <strong>mot de passe (4 chiffres)</strong> vous-même. Le mot de passe correspond aux <strong>4 derniers chiffres</strong> de votre numéro, attribué par le professeur.</p>
         </div>
 
         <div class="login-copyright" data-lang-key="login-copyright">
@@ -1763,6 +1762,7 @@
           </div>
           <div class="fiche-add-row">
             <input type="text" id="projNom" placeholder="Nom du projet..." onkeydown="if(event.key==='Enter') projAjouter()">
+            <button class="btn btn-primary" onclick="projNouveau()"><i class="fas fa-folder-plus"></i> Nouveau projet</button>
             <button class="btn btn-success" onclick="projAjouter()"><i class="fas fa-plus"></i> Ajouter</button>
             <button class="btn btn-accent" onclick="projModifier()"><i class="fas fa-pen"></i> Modifier</button>
             <button class="btn btn-danger" onclick="projSupprimer()"><i class="fas fa-trash"></i> Supprimer</button>
@@ -2271,6 +2271,25 @@
     </div>
   </div>
 
+  <!-- ===== MODAL Modification réservée à l'administrateur ===== -->
+  <div class="settings-lock-modal" id="adminGateModal">
+    <div class="settings-lock-card">
+      <div class="settings-lock-header"><i class="fas fa-user-shield"></i> Réservé à l'administrateur</div>
+      <div class="settings-lock-body">
+        <p>La modification des <strong>logos</strong> et des <strong>photos de la galerie</strong> est réservée à l'administrateur. Saisissez le mot de passe pour continuer.</p>
+        <div class="login-field">
+          <label><i class="fas fa-lock"></i> Mot de passe administrateur</label>
+          <input type="password" id="adminGatePass" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();validerAdminGate();}">
+        </div>
+        <div class="login-error" id="adminGateError"></div>
+        <div class="settings-lock-actions">
+          <button class="btn btn-secondary" onclick="fermerAdminGate()"><i class="fas fa-times"></i> Annuler</button>
+          <button class="btn btn-primary" onclick="validerAdminGate()"><i class="fas fa-unlock-alt"></i> Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
     <!-- ===== MODAL Licence ===== -->
   <div class="modal-licence" id="licenceModal">
@@ -2436,12 +2455,13 @@
       return out;
     }
 
-    function passHash(p) { return sha256Hex('Les Projets des Stagiaires - ' + p); }
-
-    // ===== Identifiants d'accès (empreintes SHA-256, aucun mot de passe en clair) =====
-    const ADMIN_USER = 'Profdouadi';
-    const ADMIN_PASS_HASH = 'db607c6bf7052ec20dda6646a9cca0df35964e8e1480ab3f32865181057c1ea1';
-    const SETTINGS_PASS_HASH = 'db607c6bf7052ec20dda6646a9cca0df35964e8e1480ab3f32865181057c1ea1';
+    // ===== Identifiants d'accès protégés (aucun identifiant ni mot de passe en clair) =====
+    const AUTH_SALT = '517670aa3dc9f48c724d53e5a1aea398307735567c60d9de';
+    function passHash(p) { return sha256Hex(AUTH_SALT + ':' + p); }
+    function identifiantHash(u) { return sha256Hex(AUTH_SALT + ':' + u.trim().toLowerCase()); }
+    const ADMIN_USER_HASH = '7a6c15bcdcf959c71d1dd7e4bf64bddb982fb01a32365d831dd7dacac12c20ed';
+    const ADMIN_PASS_HASH = 'cd153356bfcb688cb5c25771ede14f00175851a3f76d25aba29e675286848516';
+    const SETTINGS_PASS_HASH = 'cd153356bfcb688cb5c25771ede14f00175851a3f76d25aba29e675286848516';
 const SESSION_KEY = 'ps_admin_session';
 const SESSION_TYPE_KEY = 'ps_session_type';
 const STU_KEY = 'ps_stagiaire_tel';
@@ -2917,7 +2937,6 @@ const STU_KEY = 'ps_stagiaire_tel';
         'login-stu-title': '<i class="fas fa-user-graduate"></i> Accès Stagiaire',
         'login-stu-tel': '<i class="fas fa-phone"></i> Numéro de téléphone (identifiant)',
         'login-stu-pass': '<i class="fas fa-key"></i> Mot de passe (4 chiffres)',
-        'login-stu-hint': 'Saisissez votre <strong>numéro de téléphone</strong> puis votre <strong>mot de passe (4 chiffres)</strong> vous-même. Le mot de passe correspond aux <strong>4 derniers chiffres</strong> de votre numéro, attribué par le professeur.',
         'login-copyright': '<i class="fas fa-copyright"></i> 2026 — Professeur Douadi Nabil · INSFP ELHidhab'
       },
       ar: {
@@ -2945,7 +2964,6 @@ const STU_KEY = 'ps_stagiaire_tel';
     'login-stu-title': '<i class="fas fa-user-graduate"></i> ولوج المتربص',
     'login-stu-tel': '<i class="fas fa-phone"></i> رقم الهاتف (المعرف)',
     'login-stu-pass': '<i class="fas fa-key"></i> كلمة المرور (4 أرقام)',
-    'login-stu-hint': 'اكتب <strong>رقم الهاتف</strong> ثم <strong>كلمة المرور (4 أرقام)</strong> بنفسك. كلمة المرور هي <strong>آخر 4 أرقام</strong> من رقمك، حسب ما يحدده الأستاذ.',
         'login-copyright': '<i class="fas fa-copyright"></i> 2026 — الأستاذ دوادي نبيل · INSFP ELHidhab'
       },
       en: {
@@ -3016,6 +3034,40 @@ const STU_KEY = 'ps_stagiaire_tel';
       });
     }
 
+    // ===== Modification logos et galerie réservée à l'administrateur =====
+    let adminGateCallback = null;
+
+    function exigerAdmin(action) {
+      if (sessionStorage.getItem(SESSION_TYPE_KEY) === 'admin' && sessionStorage.getItem(SESSION_KEY) === '1') {
+        if (typeof action === 'function') action();
+        return true;
+      }
+      adminGateCallback = (typeof action === 'function') ? action : null;
+      document.getElementById('adminGatePass').value = '';
+      document.getElementById('adminGateError').textContent = '';
+      document.getElementById('adminGateModal').classList.add('show');
+      document.getElementById('adminGatePass').focus();
+      return false;
+    }
+
+    function fermerAdminGate() {
+      document.getElementById('adminGateModal').classList.remove('show');
+      adminGateCallback = null;
+    }
+
+    function validerAdminGate() {
+      if (passHash(document.getElementById('adminGatePass').value.trim()) === ADMIN_PASS_HASH) {
+        const cb = adminGateCallback;
+        fermerAdminGate();
+        showToast('Accès administrateur autorisé', 'fas fa-user-shield');
+        if (cb) cb();
+      } else {
+        document.getElementById('adminGateError').textContent = '⚠ Mot de passe administrateur incorrect.';
+        document.getElementById('adminGatePass').value = '';
+        document.getElementById('adminGatePass').focus();
+      }
+    }
+
     // ===== Galerie 4 photos modifiables par l'admin =====
     const GALERIE_KEY = 'ps_galerie_accueil';
     let galerie = ['', '', '', ''];
@@ -3037,8 +3089,10 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function galChanger(i) {
-      galIndex = i;
-      document.getElementById('galInput').click();
+      exigerAdmin(function() {
+        galIndex = i;
+        document.getElementById('galInput').click();
+      });
     }
 
     function galFichierChoisi(input) {
@@ -3082,17 +3136,21 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function galToutEffacer() {
-      if (!confirm('Effacer les 4 photos de la galerie ?')) return;
-      galerie = ['', '', '', ''];
-      galerieSauver();
-      galerieRendre();
-      showToast('Galerie effacée', 'fas fa-eraser');
+      exigerAdmin(function() {
+        if (!confirm('Effacer les 4 photos de la galerie ?')) return;
+        galerie = ['', '', '', ''];
+        galerieSauver();
+        galerieRendre();
+        showToast('Galerie effacée', 'fas fa-eraser');
+      });
     }
 
     // ===== Logos modifiables par l'administrateur =====
     function changeLogo(side) {
       if (document.body.classList.contains('locked')) return;
-      document.getElementById('logo' + side + 'File').click();
+      exigerAdmin(function() {
+        document.getElementById('logo' + side + 'File').click();
+      });
     }
 
     document.addEventListener('change', function(e) {
@@ -3140,8 +3198,10 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function changeAccueilLogo(side) {
-      const input = document.getElementById('accueilLogo' + (side === 'left' ? 'Left' : 'Right') + 'Input');
-      if (input) input.click();
+      exigerAdmin(function() {
+        const input = document.getElementById('accueilLogo' + (side === 'left' ? 'Left' : 'Right') + 'Input');
+        if (input) input.click();
+      });
     }
 
     function accueilLogoChanged(side, input) {
@@ -3163,6 +3223,46 @@ const STU_KEY = 'ps_stagiaire_tel';
       const now = new Date();
       document.getElementById('headerDate').textContent = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
       document.getElementById('headerTime').textContent = now.toTimeString().split(' ')[0];
+    }
+
+    // ===== Protection connexion (anti-tentatives multiples / anti-partage) =====
+    const AUTH_MAX_ECHECS = 5;
+    const AUTH_VERROU_MS = 30000;
+    let authEchecs = 0;
+    let authVerrouJusqua = 0;
+    let authMinuteur = null;
+
+    function authBloqueReste() {
+      if (authVerrouJusqua > Date.now()) return Math.ceil((authVerrouJusqua - Date.now()) / 1000);
+      return 0;
+    }
+
+    function marquerEchecAuth() {
+      authEchecs++;
+      if (authEchecs >= AUTH_MAX_ECHECS) {
+        authVerrouJusqua = Date.now() + AUTH_VERROU_MS;
+        authEchecs = 0;
+      }
+    }
+
+    function reussiteAuth() {
+      authEchecs = 0;
+      authVerrouJusqua = 0;
+      if (authMinuteur) { clearInterval(authMinuteur); authMinuteur = null; }
+    }
+
+    function compteurVerrouillage(errEl) {
+      if (authMinuteur) clearInterval(authMinuteur);
+      authMinuteur = setInterval(function() {
+        const r = authBloqueReste();
+        if (r > 0) {
+          errEl.textContent = '⏱ Trop de tentatives. Réessayez dans ' + r + ' s.';
+        } else {
+          clearInterval(authMinuteur);
+          authMinuteur = null;
+          errEl.textContent = '';
+        }
+      }, 1000);
     }
 
     // ===== Connexion (professeur uniquement) =====
@@ -3197,21 +3297,24 @@ const STU_KEY = 'ps_stagiaire_tel';
       const tel = stuNormalize(document.getElementById('stuTel').value);
       const pass = document.getElementById('stuPass').value.trim();
       const err = document.getElementById('stuError');
+      const verrou = authBloqueReste();
+      if (verrou > 0) {
+        err.textContent = '⏱ Trop de tentatives. Réessayez dans ' + verrou + ' s.';
+        compteurVerrouillage(err);
+        return;
+      }
       if (tel === '' || pass === '') {
         err.textContent = '⚠ Veuillez saisir votre numéro de téléphone et votre mot de passe.';
         return;
       }
       const profil = profileList.find(function(p) { return p.phone === tel; });
-      if (!profil) {
-        err.textContent = '⚠ Aucun stagiaire enregistré avec ce numéro. Contactez votre professeur.';
-        return;
-      }
-      const attendu = tel.slice(-4);
-      if (pass !== attendu) {
-        err.textContent = '⚠ Mot de passe incorrect (les 4 derniers chiffres de votre numéro).';
+      if (!profil || (passHash(pass) !== profil.pass && pass !== profil.pass)) {
+        marquerEchecAuth();
+        err.textContent = '⚠ Numéro ou mot de passe incorrect. Contactez votre professeur pour toute assistance.';
         document.getElementById('stuPass').value = '';
         return;
       }
+      reussiteAuth();
       sessionStorage.setItem(SESSION_KEY, '1');
       sessionStorage.setItem(SESSION_TYPE_KEY, 'stagiaire');
       sessionStorage.setItem(STU_KEY, tel);
@@ -3258,13 +3361,20 @@ const STU_KEY = 'ps_stagiaire_tel';
       const userInput = document.getElementById('loginUser').value.trim();
       const passInput = document.getElementById('loginPass').value.trim();
       const errorEl = document.getElementById('loginError');
+      const verrou = authBloqueReste();
+      if (verrou > 0) {
+        errorEl.textContent = '⏱ Trop de tentatives. Réessayez dans ' + verrou + ' s.';
+        compteurVerrouillage(errorEl);
+        return;
+      }
 
       if (userInput === '' || passInput === '') {
         errorEl.textContent = '⚠ Veuillez saisir l\'identifiant et le mot de passe.';
         return;
       }
 
-      if (userInput.toLowerCase() === ADMIN_USER.toLowerCase() && passHash(passInput) === ADMIN_PASS_HASH) {
+      if (identifiantHash(userInput) === ADMIN_USER_HASH && passHash(passInput) === ADMIN_PASS_HASH) {
+        reussiteAuth();
         sessionStorage.setItem(SESSION_KEY, '1');
         sessionStorage.setItem(SESSION_TYPE_KEY, 'admin');
         sessionStorage.removeItem(STU_KEY);
@@ -3280,6 +3390,7 @@ const STU_KEY = 'ps_stagiaire_tel';
           showToast('Bienvenue, Professeur ' + settingsForm.profName + ' !', 'fas fa-user-shield');
         }, 200);
       } else {
+        marquerEchecAuth();
         errorEl.textContent = '⚠ Identifiant ou mot de passe incorrect.';
         document.getElementById('loginPass').value = '';
         document.getElementById('loginPass').focus();
@@ -3988,6 +4099,17 @@ const STU_KEY = 'ps_stagiaire_tel';
       showToast('Projet ajouté : ' + nom, 'fas fa-folder-plus');
     }
 
+    function projNouveau() {
+      ficheSel = null;
+      ficheSelPhoto = null;
+      const inp = document.getElementById('projNom');
+      inp.value = '';
+      inp.focus();
+      ficheToutRendre();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Nouveau projet — saisissez le nom puis cliquez sur Ajouter', 'fas fa-folder-plus');
+    }
+
     function projCharger(id) {
       ficheId = id;
       ficheSel = null;
@@ -4678,8 +4800,8 @@ const STU_KEY = 'ps_stagiaire_tel';
         l.href = 'style.css';
         s.parentNode.replaceChild(l, s);
       });
-      // 3. Externalise le JS vers script.js
-      clone.querySelectorAll('script').forEach(function(s) {
+      // 3. Externalise uniquement le JS integre (conserve les scripts externes comme pdf.js)
+      clone.querySelectorAll('script:not([src])').forEach(function(s) {
         const ext = document.createElement('script');
         ext.src = 'script.js';
         s.parentNode.replaceChild(ext, s);
@@ -4702,7 +4824,7 @@ const STU_KEY = 'ps_stagiaire_tel';
               base + ' - INSTALLATION\n\n' +
               '1. Decompressez le dossier ZIP.\n' +
               '2. Double-cliquez sur "' + nomHtml + '" pour ouvrir l\'application.\n' +
-              '3. Identifiants administrateur : " + ADMIN_USER + " / mot de passe defini par le proprietaire\n\n' +
+              '3. Identifiants professeur (administrateur) : nom d\'utilisateur et mot de passe du professeur (aucun code en clair dans les fichiers)\n\n' +
               'Fichiers :\n' +
               '- ' + nomHtml + ' : structure de la page\n' +
               '- style.css : design (couleurs, mise en page)\n' +
