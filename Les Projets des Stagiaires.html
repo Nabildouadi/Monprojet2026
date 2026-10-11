@@ -1,0 +1,843 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="cm1ec50lHa9lN6OwAlbqc_zBCOTQpOjpZjnm5C_KJ90" />
+  <meta name="description" content="Plateforme pédagogique de gestion des projets des stagiaires - INSFP El Hidhab, Sétif. Encadrement, notation, archives et fiches projet. © 2026 Professeur Douadi Nabil.">
+  <meta name="author" content="Professeur Douadi Nabil - INSFP El Hidhab">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0ea5e9">
+  <link rel="canonical" href="https://nabildouadi.github.io/Monprojet2026/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Les Projets des Stagiaires - INSFP EL Hidhab">
+  <meta property="og:title" content="Les Projets des Stagiaires - INSFP EL Hidhab 2026">
+  <meta property="og:description" content="Plateforme pédagogique de gestion des projets des stagiaires - INSFP El Hidhab, Sétif.">
+  <meta property="og:url" content="https://nabildouadi.github.io/Monprojet2026/">
+  <meta property="og:locale" content="fr_DZ">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230ea5e9'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+  <title>Les Projets des Stagiaires - INSFP ELHIDHAB</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+
+</head>
+  <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  <body class="locked show-accueil">
+  <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+    <!-- ===== PAGE D'ACCUEIL / ACCÈS ===== -->
+  <div class="accueil-page" id="accueilPage">
+    <div class="accueil-lang" id="accueilLang" data-lang-label="Langue">
+      <button type="button" data-lang-btn="ar" onclick="setAccueilLang('ar')">العربية</button>
+      <button type="button" data-lang-btn="fr" onclick="setAccueilLang('fr')">Français</button>
+      <button type="button" data-lang-btn="en" onclick="setAccueilLang('en')">English</button>
+    </div>
+    <header class="accueil-header">
+      <div class="accueil-header-top">
+        <div class="accueil-logo" id="accueilLogoLeft" onclick="changeAccueilLogo('left')" title="Cliquer pour modifier le logo gauche">
+          <div class="accueil-logo-placeholder"><i class="fas fa-landmark"></i></div>
+          <img id="accueilLogoLeftImg" alt="Logo gauche" style="display:none;">
+          <input type="file" id="accueilLogoLeftInput" accept="image/*" style="display:none" onchange="accueilLogoChanged('left',this)">
+        </div>
+        <div class="accueil-header-center">
+          <div class="accueil-republique" data-lang-key="republique">République Algérienne Démocratique et Populaire</div>
+          <div class="accueil-ministere" data-lang-key="ministere">Ministère De La Formation et de l'enseignement Professionnels</div>
+          <div class="accueil-institut" data-lang-key="institut">Institut National Spécialisé de la formation Professionnelle (ELHidhab)</div>
+        </div>
+        <div class="accueil-logo" id="accueilLogoRight" onclick="changeAccueilLogo('right')" title="Cliquer pour modifier le logo droit">
+          <div class="accueil-logo-placeholder"><i class="fas fa-graduation-cap"></i></div>
+          <img id="accueilLogoRightImg" alt="Logo Professeur Douadi Nabil" style="display:none;">
+          <input type="file" id="accueilLogoRightInput" accept="image/*" style="display:none" onchange="accueilLogoChanged('right',this)">
+        </div>
+      </div>
+    </header>
+
+    <main class="accueil-main">
+      <div class="accueil-title-section">
+        <h1 class="accueil-main-title" data-lang-key="accueil-title"><i class="fas fa-diagram-project"></i> Les Projets des Stagiaires</h1>
+        <div class="accueil-highlight" data-lang-key="accueil-highlight">Encadrement des projets — INSFP ELHIDHAB 2026</div>
+        <div class="galerie-box">
+          <div class="galerie-head">
+            <i class="fas fa-images"></i> <span>Galerie photos</span>
+            <span class="galerie-hint">Admin : cliquer sur une photo pour la changer</span>
+            <button class="btn btn-secondary" style="padding:.2rem .55rem;font-size:.66rem;" onclick="galToutEffacer()"><i class="fas fa-eraser"></i> Effacer</button>
+          </div>
+          <div class="galerie" id="galerie">
+            <div class="gal-item" onclick="galChanger(0)"><i class="fas fa-image"></i><span class="gal-num">1</span><span class="gal-badge"><i class="fas fa-camera"></i></span></div>
+            <div class="gal-item" onclick="galChanger(1)"><i class="fas fa-image"></i><span class="gal-num">2</span><span class="gal-badge"><i class="fas fa-camera"></i></span></div>
+            <div class="gal-item" onclick="galChanger(2)"><i class="fas fa-image"></i><span class="gal-num">3</span><span class="gal-badge"><i class="fas fa-camera"></i></span></div>
+            <div class="gal-item" onclick="galChanger(3)"><i class="fas fa-image"></i><span class="gal-num">4</span><span class="gal-badge"><i class="fas fa-camera"></i></span></div>
+          </div>
+          <input type="file" id="galInput" accept="image/*" style="display:none;" onchange="galFichierChoisi(this)">
+        </div>
+        <div class="accueil-professor" data-lang-key="accueil-professor">Professeur Douadi Nabil</div>
+
+        <div class="accueil-access-buttons">
+          <div class="accueil-access-card" onclick="openAccueilLogin('prof')">
+            <div class="accueil-access-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="accueil-access-label" data-lang-key="access-prof">Accès Professeur</div>
+            <div class="accueil-access-sub" data-lang-key="access-prof-sub">Espace enseignant pour la gestion des projets</div>
+          </div>
+          <div class="accueil-access-card" onclick="openAccueilLogin('stu')">
+            <div class="accueil-access-icon"><i class="fas fa-user-graduate"></i></div>
+            <div class="accueil-access-label" data-lang-key="access-stu">Accès Stagiaire</div>
+            <div class="accueil-access-sub" data-lang-key="access-stu-sub">Espace personnel du stagiaire</div>
+          </div>
+        </div>
+
+        <div class="accueil-info" data-lang-key="accueil-info">
+          <i class="fas fa-book-open" style="color:#4fc3f7;"></i>&nbsp;
+          Cette plateforme accompagne la préparation des <strong>projets des stagiaires</strong> : suivi des stagiaires,
+          choix du sujet, méthodologie de rédaction, conseils pratiques et évaluation des soutenances.
+        </div>
+      </div>
+    </main>
+
+    <footer class="accueil-footer">
+      <div class="accueil-footer-content">
+        <p data-lang-key="accueil-footer">Tous droits réservés © 2026 — <strong style="color:#b2dfdb;">Professeur Douadi Nabil</strong> · INSFP ELHidhab · Les Projets des Stagiaires<br>
+        <span class="sign">Prof. Douadi Nabil</span></p>
+      </div>
+    <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+    </footer>
+  </div>
+
+    <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  <!-- ===== CONNEXION ===== -->
+  <div class="accueil-login-overlay" id="accueilLoginOverlay">
+    <div class="login-card">
+      <div class="login-card-header">
+        <button class="login-card-close" onclick="closeAccueilLogin()"><i class="fas fa-times"></i></button>
+        <div class="drap-algerie"></div>
+        <p class="big" data-lang-key="login-connexion">Connexion — Espace Professeur</p>
+      </div>
+      <div class="login-card-body">
+        <div class="login-mode-tabs">
+          <button class="login-mode-tab active" id="modeTabProf" onclick="setLoginMode('prof')"><i class="fas fa-user-shield"></i> Professeur</button>
+          <button class="login-mode-tab" id="modeTabStu" onclick="setLoginMode('stu')"><i class="fas fa-user-graduate"></i> Stagiaire</button>
+        </div>
+
+        <div id="loginPanelProf">
+          <div class="login-avatar"><i class="fas fa-user-shield"></i></div>
+          <h2 data-lang-key="login-title"><i class="fas fa-user-shield"></i> Accès Professeur</h2>
+          <p class="login-sub" data-lang-key="login-sub">Les Projets des Stagiaires — INSFP ELHidhab</p>
+          <div class="login-big-title" id="loginBigTitle" data-lang-key="login-bigtitle">Je m'exerce avec les <span>Projets des Stagiaires</span></div>
+          <div class="login-prof-name"><i class="fas fa-user-tie"></i><strong id="loginProfName" data-lang-key="login-profname">Douadi Nabil</strong></div>
+          <div class="login-divider" style="height:2px;background:linear-gradient(90deg,transparent,var(--primary),transparent);margin:1rem 0 0.5rem;"></div>
+          <div class="login-field">
+            <label data-lang-key="login-user"><i class="fas fa-user"></i> Nom d'utilisateur</label>
+            <input type="text" id="loginUser" placeholder="Profdouadi" autocomplete="off">
+          </div>
+          <div class="login-field">
+            <label data-lang-key="login-pass"><i class="fas fa-lock"></i> Mot de passe</label>
+            <input type="password" id="loginPass" placeholder="••••••••" autocomplete="new-password">
+          </div>
+          <div class="login-error" id="loginError"></div>
+          <button class="btn btn-primary btn-block" onclick="handleLogin()" data-lang-key="login-btn"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+          <p class="login-hint" data-lang-key="login-hint">Accès protégé réservé à l'enseignant (nom d'utilisateur et mot de passe du professeur).</p>
+        </div>
+
+        <div id="loginPanelStu" style="display:none;">
+          <div class="login-avatar"><i class="fas fa-user-graduate"></i></div>
+          <h2 data-lang-key="login-stu-title"><i class="fas fa-user-graduate"></i> Accès Stagiaire</h2>
+          <p class="login-sub" data-lang-key="login-sub">Les Projets des Stagiaires — INSFP ELHidhab</p>
+          <div class="login-divider" style="height:2px;background:linear-gradient(90deg,transparent,var(--secondary),transparent);margin:1rem 0 0.5rem;"></div>
+          <div class="login-field">
+            <label data-lang-key="login-stu-tel"><i class="fas fa-phone"></i> Numéro de téléphone (identifiant)</label>
+            <input type="tel" id="stuTel" placeholder="06 00 00 00 00" autocomplete="off" onkeydown="if(event.key==='Enter') stuConnexion()">
+          </div>
+          <div class="login-field">
+            <label data-lang-key="login-stu-pass"><i class="fas fa-key"></i> Mot de passe (4 chiffres)</label>
+            <input type="text" id="stuPass" placeholder="————" maxlength="4" inputmode="numeric" autocomplete="new-password" oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)" onkeydown="if(event.key==='Enter') stuConnexion()">
+          </div>
+          <div class="login-error" id="stuError"></div>
+          <button class="btn btn-success btn-block" onclick="stuConnexion()" data-lang-key="login-btn"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+        </div>
+
+        <div class="login-copyright" data-lang-key="login-copyright">
+          <i class="fas fa-copyright"></i> 2026 — Professeur Douadi Nabil · INSFP ELHidhab
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- En-tête officiel -->
+    <header class="official-header">
+      <div class="header-top">
+        <div class="header-logo" id="logoLeft" onclick="changeLogo('Left')">
+          <div class="logo-placeholder"><i class="fas fa-landmark"></i></div>
+          <img id="logoLeftImg" style="display:none;" alt="Logo">
+          <div class="logo-change"><i class="fas fa-camera"></i><span>Admin :<br>changer</span></div>
+          <input type="file" id="logoLeftFile" accept="image/*" hidden>
+        </div>
+        <div class="header-official-text">
+          <p class="line1">République Algérienne Démocratique et Populaire</p>
+          <p class="line2">Ministère De La Formation et de l'enseignement Professionnels</p>
+          <p class="line3">Institut National Spécialisé de la formation Professionnelle (ELHidhab)</p>
+        </div>
+        <div class="header-logo" id="logoRight" onclick="changeLogo('Right')">
+          <div class="logo-placeholder"><i class="fas fa-graduation-cap"></i></div>
+          <img id="logoRightImg" style="display:none;" alt="Logo">
+          <div class="logo-change"><i class="fas fa-camera"></i><span>Admin :<br>changer</span></div>
+          <input type="file" id="logoRightFile" accept="image/*" hidden>
+        </div>
+      </div>
+      <div class="header-profil">
+        <div class="header-divider"></div>
+        <p class="header-prof">
+          <i class="fas fa-user-tie"></i>
+          <strong id="profNameStrong">Douadi Nabil</strong>
+        </p>
+        <h1 class="header-title"><i class="fas fa-diagram-project"></i><span id="appTitleText">Les Projets des Stagiaires</span></h1>
+        <p class="header-datetime">
+          <i class="fas fa-calendar-day"></i><span id="headerDate">--</span>
+          <i class="fas fa-clock"></i><span id="headerTime">--:--:--</span>
+        </p>
+        <div class="app-lang" id="appLang" data-lang-label="Langue">
+          <span class="app-lang-label"><i class="fas fa-globe"></i> <span data-lang-key="app-lang-label">Langue</span></span>
+          <button type="button" data-lang-btn="ar" onclick="setLang('ar')">العربية</button>
+          <button type="button" data-lang-btn="fr" onclick="setLang('fr')">Français</button>
+          <button type="button" data-lang-btn="en" onclick="setLang('en')">English</button>
+        </div>
+      </div>
+    </header>
+
+      <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  <nav class="page-nav" id="appPages">
+      <button class="page-tab active" data-page="page-profile" data-role="prof" onclick="switchAppPage('page-profile')"><i class="fas fa-id-card"></i> <span data-lang-key="nav-profile">Profile Stagiaire</span></button>
+      <button class="page-tab" data-page="page-fiche" data-role="prof stu" onclick="switchAppPage('page-fiche')"><i class="fas fa-folder-open"></i> <span data-lang-key="nav-fiche">Fiche Projet</span></button>
+              <button class="page-tab" data-page="page-notation" data-role="prof" onclick="switchAppPage('page-notation')"><i class="fas fa-clipboard-check"></i> <span data-lang-key="nav-notation">Notation du projet</span></button>
+        <button class="page-tab" data-page="page-archive" data-role="prof" onclick="switchAppPage('page-archive')"><i class="fas fa-box-archive"></i> <span data-lang-key="nav-archive">Archive des Projets</span></button>
+      <button class="page-tab" data-page="page-parametres" data-role="prof" onclick="switchAppPage('page-parametres')"><i class="fas fa-palette"></i> <span data-lang-key="nav-params">Paramètres</span></button>
+    </nav>
+
+      <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  <!-- ===== Page Fiche Projet ===== -->
+    <section class="app-page" id="page-fiche">
+      <section class="gest-section">
+        <h2><i class="fas fa-folder-open"></i> <span data-lang-key="h-fiche">Fiche Projet</span> <span class="auto-note"><i class="fas fa-bolt"></i> Sauvegarde locale automatique</span></h2>
+
+        <div class="fiche-prog-wrap">
+          <span class="fiche-count" id="ficheCtx">Aucun projet sélectionné</span>
+          <div class="fiche-prog"><span id="ficheProgBar"></span></div>
+          <span class="fiche-prog-txt" id="ficheProgTxt">0%</span>
+          <span class="fiche-saved-flash" id="ficheFlash"><i class="fas fa-check"></i> Sauvegardé</span>
+        </div>
+
+        <!-- En-tête officiel (impression uniquement) -->
+        <div class="fiche-print-head" id="fichePrintHead"></div>
+
+        <!-- Impression &amp; export -->
+        <div class="fiche-export">
+          <span class="fiche-export-label"><i class="fas fa-print"></i> <span data-lang-key="app-lang-label">Impression / Export</span> :</span>
+          <button class="btn btn-primary" onclick="ficheImprimer('a4')"><i class="fas fa-print"></i> <span data-lang-key="b-imp-a4">Imprimer A4</span></button>
+          <button class="btn btn-primary" onclick="ficheImprimer('a3')"><i class="fas fa-print"></i> <span data-lang-key="b-imp-a3">Imprimer A3</span></button>
+          <button class="btn btn-success" onclick="ficheTelecharger('doc')"><i class="fas fa-file-word"></i> <span data-lang-key="b-dl-doc">Télécharger .doc</span></button>
+          <button class="btn btn-success" onclick="ficheTelecharger('docx')"><i class="fas fa-file-word"></i> <span data-lang-key="b-dl-docx">Télécharger .docx</span></button>
+          <button class="btn btn-accent" onclick="archiverDepuisFiche(true)"><i class="fas fa-box-archive"></i> <span data-lang-key="b-archiver">Archiver ce projet</span></button>
+        </div>
+
+        <!-- 1 - Nom du projet -->
+        <div class="fiche-block">
+          <div class="fiche-block-head">
+            <span class="fiche-num">1</span> <span data-lang-key="fiche-b1">Nom du projet</span>
+            <span class="fiche-count" id="ficheProjCount"></span>
+            <span class="fiche-tri-wrap">
+              <label class="fiche-tri-lbl" for="ficheTri" data-lang-key="fiche-tri">Trier :</label>
+              <select class="fiche-tri" id="ficheTri" onchange="ficheTriChanger()">
+                <option value="chrono" data-lang-key="tri1">Chronologique (ancien → récent)</option>
+                <option value="chrono-inv" data-lang-key="tri2">Chronologique inverse (récent → ancien)</option>
+                <option value="alpha" data-lang-key="tri3">Alphabétique (A → Z)</option>
+                <option value="modif" data-lang-key="tri4">Dernière modification</option>
+              </select>
+            </span>
+          </div>
+          <div class="fiche-add-row">
+            <input type="text" id="projNom" placeholder="Nom du projet..." onkeydown="if(event.key==='Enter') projAjouter()">
+            <button class="btn btn-primary" onclick="projNouveau()"><i class="fas fa-folder-plus"></i> Nouveau projet</button>
+            <button class="btn btn-success" onclick="projAjouter()"><i class="fas fa-plus"></i> Ajouter</button>
+            <button class="btn btn-accent" onclick="projModifier()"><i class="fas fa-pen"></i> Modifier</button>
+            <button class="btn btn-danger" onclick="projSupprimer()"><i class="fas fa-trash"></i> Supprimer</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+          </div>
+          <div class="proj-grid" id="projGrid"></div>
+        </div>
+
+        <!-- 2 - Les membres du projet -->
+        <div class="fiche-block">
+          <div class="fiche-block-head">
+            <span class="fiche-num">2</span> <span data-lang-key="fiche-b2">Les membres du projet</span>
+            <span class="fiche-count" data-lang-key="fiche-b2s">Nom et prénom des stagiaires (1 à 5)</span>
+            <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="ficheAction('ajouter','membres')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="ficheAction('modifier','membres')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="ficheAction('supprimer','membres')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            </div>
+          </div>
+          <div class="member-grid" id="memberGrid"></div>
+          <div class="action-buttons" style="margin-top:1rem;">
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder les membres</button>
+            <button class="btn btn-secondary" onclick="membreToutVider()"><i class="fas fa-eraser"></i> Vider les 5 fiches</button>
+          </div>
+        </div>
+
+        <!-- 3 - Objectifs du projet -->
+        <div class="fiche-block">
+          <div class="fiche-block-head">
+            <span class="fiche-num">3</span> <span data-lang-key="fiche-b3">Objectifs du projet</span>
+            <span class="fiche-count" id="cntObjectifs"></span>
+            <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="ficheAction('ajouter','objectifs')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="ficheAction('modifier','objectifs')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="ficheAction('supprimer','objectifs')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            </div>
+          </div>
+          <div class="fiche-add-row">
+            <input type="text" id="inpObjectif" placeholder="Objectif du projet..." onkeydown="if(event.key==='Enter') ficheListAdd('objectifs')">
+            <button class="btn btn-success" onclick="ficheListAdd('objectifs')"><i class="fas fa-plus"></i> Ajouter</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+          </div>
+          <div class="fiche-list" id="listeObjectifs"></div>
+        </div>
+
+        <!-- 4 - Étapes du projet -->
+        <div class="fiche-block">
+          <div class="fiche-block-head">
+            <span class="fiche-num">4</span> <span data-lang-key="fiche-b4">Étapes du projet</span>
+            <span class="fiche-count" id="cntEtapes"></span>
+            <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="ficheAction('ajouter','etapes')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="ficheAction('modifier','etapes')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="ficheAction('supprimer','etapes')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            </div>
+          </div>
+          <div class="fiche-add-row">
+            <input type="text" id="inpEtape" placeholder="Étape du projet..." onkeydown="if(event.key==='Enter') ficheListAdd('etapes')">
+            <button class="btn btn-success" onclick="ficheListAdd('etapes')"><i class="fas fa-plus"></i> Ajouter</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+          </div>
+          <div class="fiche-list" id="listeEtapes"></div>
+        </div>
+
+        <!-- 5 - Matériel et méthode -->
+        <div class="fiche-block">
+          <div class="fiche-block-head">
+            <span class="fiche-num">5</span> <span data-lang-key="fiche-b5">Matériel et méthode</span>
+          </div>
+          <div class="fiche-block" style="margin-left:.9rem;padding-left:.9rem;border-left:3px solid var(--border-color);">
+            <div class="fiche-block-head">
+              <span class="fiche-num sub">5-1</span> <span data-lang-key="fiche-b51">Matériel nécessaire</span>
+              <span class="fiche-count" id="cntMateriel"></span>
+            <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="ficheAction('ajouter','materiel')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="ficheAction('modifier','materiel')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="ficheAction('supprimer','materiel')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            </div>
+            </div>
+            <div class="fiche-add-row">
+              <input type="text" id="inpMateriel" placeholder="Matériel nécessaire..." onkeydown="if(event.key==='Enter') ficheListAdd('materiel')">
+              <button class="btn btn-success" onclick="ficheListAdd('materiel')"><i class="fas fa-plus"></i> Ajouter</button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+            </div>
+            <div class="fiche-list" id="listeMateriel"></div>
+          </div>
+          <div class="fiche-block" style="margin-left:.9rem;padding-left:.9rem;border-left:3px solid var(--border-color);">
+            <div class="fiche-block-head">
+              <span class="fiche-num sub">5-2</span> <span data-lang-key="fiche-b52">Méthode (démarche adoptée)</span>
+              <div class="fiche-block-tools">
+                <button class="btn btn-success" onclick="ficheAction('ajouter','methode')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+                <button class="btn btn-accent" onclick="ficheAction('modifier','methode')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+                <button class="btn btn-danger" onclick="ficheAction('supprimer','methode')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              </div>
+            </div>
+            <textarea id="ficheMethode" rows="4" style="width:100%;" placeholder="Décrivez la démarche méthodologique adoptée..." oninput="ficheMethodeAutoSave()"></textarea>
+            <div class="action-buttons" style="margin-top:.7rem;">
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder la méthode</button>
+            </div>
+          </div>
+        </div>
+        <!-- 6 - Photos du projet -->
+        <div class="fiche-block photos">
+          <div class="fiche-block-head">
+            <span class="fiche-num">6</span> <span data-lang-key="fiche-b6">Photos du projet</span>
+            <span class="fiche-count" data-lang-key="fiche-b6s">8 emplacements — modifiables par le professeur et les stagiaires</span>
+            <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="fichePhotoAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-photo-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="fichePhotoModifier()"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="fichePhotoSupprimer()"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            </div>
+          </div>
+          <div class="photos-grid" id="photosGrid"></div>
+          <input type="file" id="fichePhotoInput" accept="image/*" style="display:none;" onchange="fichePhotoFichier(this)">
+        </div>
+      </section>
+    </section>
+
+    <!-- ===== Page Profile Stagiaire ===== -->
+    <section class="app-page active" id="page-profile">
+      <section class="gest-section">
+        <h2><i class="fas fa-id-card"></i> <span data-lang-key="h-prof">Profile Stagiaire</span> <span class="auto-note"><i class="fas fa-shield-alt"></i> Accès Professeur</span></h2>
+        <div class="rf-formula">
+          <i class="fas fa-info-circle"></i>
+          <span>Renseignez la fiche du stagiaire : <strong>nom et prénom</strong>, <strong>numéro de téléphone</strong> (le mot de passe est saisi automatiquement avec les 4 derniers chiffres), <strong>spécialité</strong>, <strong>photo</strong> (facultative) et le <strong>semestre</strong> (S1 à S5).</span>
+        </div>
+        <div class="gest-grid">
+          <div class="gest-form">
+            <div class="gest-form-title"><i class="fas fa-user-plus"></i> <span data-lang-key="fiche-form">Fiche du stagiaire</span></div>
+            <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1rem;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0.45rem;">
+                <div class="prof-photo-box" id="profPhotoBox" onclick="document.getElementById('profPhoto').click()" title="Cliquer pour choisir une photo (facultatif)">
+                  <i class="fas fa-camera" id="profPhotoIcon"></i>
+                  <img id="profPhotoPreview" alt="Photo du stagiaire" style="display:none;">
+                </div>
+                <input type="file" id="profPhoto" accept="image/*" style="display:none;" onchange="profPhotoChanged(this)">
+                <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem;" onclick="document.getElementById('profPhoto').click()"><i class="fas fa-upload"></i> <span data-lang-key="b-photo">Photo</span></button>
+                <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem;" onclick="profPhotoClear()"><i class="fas fa-eraser"></i> <span data-lang-key="b-retirer">Retirer</span></button>
+                <span style="font-size:0.68rem;color:var(--text-muted);">Facultative</span>
+              </div>
+              <div style="flex:1;min-width:260px;">
+                <div class="data-form-grid">
+                  <div class="data-form-group">
+                    <label><i class="fas fa-user"></i> <span data-lang-key="lbl-nom">Nom</span></label>
+                    <input type="text" id="profNom" placeholder="Nom...">
+                  </div>
+                  <div class="data-form-group">
+                    <label><i class="fas fa-user"></i> <span data-lang-key="lbl-prenom">Prénom</span></label>
+                    <input type="text" id="profPrenom" placeholder="Prénom...">
+                  </div>
+                  <div class="data-form-group">
+                    <label><i class="fas fa-phone"></i> <span data-lang-key="lbl-tel">Numéro de téléphone</span></label>
+                    <input type="tel" id="profPhone" placeholder="06 00 00 00 00" oninput="profAutoPass()">
+                  </div>
+                  <div class="data-form-group">
+                    <label><i class="fas fa-key"></i> <span data-lang-key="lbl-pass">Mot de passe (4 derniers chiffres)</span></label>
+                    <input type="text" id="profPass" readonly placeholder="————">
+                  </div>
+                  <div class="data-form-group" style="grid-column:1/-1;">
+                    <label><i class="fas fa-graduation-cap"></i> <span data-lang-key="lbl-spec">Spécialité</span></label>
+                    <select id="profSpecialite">
+                      <option value="">-- Sélectionner --</option>
+                    </select>
+                    <div class="spec-manager">
+                      <div class="spec-chips" id="specChips"></div>
+                      <div class="spec-add">
+                        <input type="text" id="specInput" placeholder="Nouvelle spécialité..." onkeydown="if(event.key==='Enter') profSpecAjouter()">
+                        <button class="btn btn-success" onclick="profSpecAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+                        <button class="btn btn-primary" onclick="profSpecSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="data-form-group">
+                    <label><i class="fas fa-calendar-alt"></i> <span data-lang-key="lbl-sem">Semestre</span></label>
+                    <select id="profSemestre">
+                      <option value="">-- Sélectionner --</option>
+                      <option value="S1">S1 — Semestre 1</option>
+                      <option value="S2">S2 — Semestre 2</option>
+                      <option value="S3">S3 — Semestre 3</option>
+                      <option value="S4">S4 — Semestre 4</option>
+                      <option value="S5">S5 — Semestre 5</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button class="btn btn-success" onclick="profAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="profModifier()"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="profSupprimer()"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="profSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-secondary" onclick="profVider()"><i class="fas fa-eraser"></i> <span data-lang-key="b-vider">Vider</span></button>
+            </div>
+          </div>
+          <div class="gest-list">
+            <div class="gest-list-title"><i class="fas fa-list"></i> <span data-lang-key="fiche-liste">Liste des profils stagiaires</span></div>
+            <div class="results-table-container">
+              <table class="results-table gest-table prof-table">
+                <thead>
+                  <tr>
+                    <th data-lang-key="th-n">N°</th>
+                    <th data-lang-key="th-photo">Photo</th>
+                    <th data-lang-key="th-nomprenom">Nom &amp; Prénom</th>
+                    <th data-lang-key="th-tel">Téléphone</th>
+                    <th data-lang-key="th-pass">Mot de passe</th>
+                    <th data-lang-key="th-spec">Spécialité</th>
+                    <th data-lang-key="th-sem">Semestre</th>
+                  </tr>
+                </thead>
+                <tbody id="profBody"></tbody>
+              </table>
+            </div>
+            <p class="gest-empty" id="profEmpty">Aucun profil stagiaire enregistré pour le moment.</p>
+            <p class="gest-counter" id="profCounter"></p>
+            <div class="plan-meta" id="profMeta"></div>
+            <div class="action-buttons">
+              <button class="btn btn-secondary" onclick="profExport()"><i class="fas fa-file-export"></i> <span data-lang-key="b-exporter">Exporter (JSON)</span></button>
+              <button class="btn btn-secondary" onclick="document.getElementById('profImport').click()"><i class="fas fa-file-import"></i> <span data-lang-key="b-importer">Importer (JSON)</span></button>
+              <input type="file" id="profImport" accept=".json,application/json" style="display:none;" onchange="profImportChanged(this)">
+              <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> <span data-lang-key="b-imprimer">Imprimer</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+      <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  <!-- ===== Page Notation du projet ===== -->
+    <section class="app-page" id="page-notation">
+      <section class="gest-section">
+        <h2><i class="fas fa-clipboard-check"></i> <span data-lang-key="h-notation">Notation du projet</span> <span class="auto-note"><i class="fas fa-shield-alt"></i> Réservé à l'administrateur</span></h2>
+        <div class="rf-formula">
+          <i class="fas fa-info-circle"></i>
+          <span data-lang-key="notation-info">Sélectionnez un projet : le nom du projet et le nom des stagiaires sont remplis automatiquement. Saisissez la note obtenue sur 20 pour chaque critère — le total et l'appréciation se calculent automatiquement.</span>
+        </div>
+
+        <div class="fiche-print-head" id="notationPrintHead"></div>
+
+        <!-- Choix du projet + stagiaires (auto) -->
+        <div class="notation-pick">
+          <div class="data-field">
+            <label data-lang-key="notation-projet">Projet à noter</label>
+            <select id="notationProjet" onchange="notationChanger(this.value)"></select>
+          </div>
+          <div class="notation-equipe">
+            <div class="notation-equipe-titre"><i class="fas fa-users"></i> <span data-lang-key="notation-equipe">Stagiaires du projet (rempli automatiquement)</span></div>
+            <div class="notation-equipe-grille" id="notationMembres"></div>
+          </div>
+        </div>
+
+        <!-- Totaux -->
+        <div class="notation-totaux">
+          <div class="notif-card"><b id="notifTotal20">—</b><span data-lang-key="notif-lbl-20">Total /20</span></div>
+          <div class="notif-card"><b id="notifTotal100">—</b><span data-lang-key="notif-lbl-100">Équivalent /100</span></div>
+          <div class="notif-card large"><b id="notifApp">—</b><span data-lang-key="notif-lbl-app">Appréciation</span></div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="notationSauver()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+          <button class="btn btn-secondary" onclick="notationCalculer()"><i class="fas fa-calculator"></i> <span data-lang-key="b-calculer">Calculer le total</span></button>
+          <button class="btn btn-primary" onclick="notationRendreEnTete(); window.print()"><i class="fas fa-print"></i> <span data-lang-key="b-imprimer">Imprimer la grille</span></button>
+        </div>
+
+        <!-- Ajout d'un critère -->
+        <div class="fiche-add-row notation-add">
+          <input type="text" id="critInpTexte" data-lang-placeholder="crit-ph" placeholder="Intitulé du nouveau critère..." onkeydown="if(event.key==='Enter') notationCritAjouter()">
+          <input type="number" id="critInp100" min="0" max="100" step="1" value="5" title="Points /100" style="width:92px;text-align:center;">
+          <input type="number" id="critInp20" min="0" max="20" step="0.5" value="1" title="Points /20" style="width:88px;text-align:center;">
+          <button class="btn btn-success" onclick="notationCritAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+        </div>
+
+        <!-- Grille d'évaluation -->
+        <div class="table-wrap">
+          <table class="gest-table notation-table">
+            <thead>
+              <tr>
+                <th style="width:42px;">N°</th>
+                <th data-lang-key="th-critere">Critère d'évaluation</th>
+                <th style="width:96px;" data-lang-key="th-p100">Points /100</th>
+                <th style="width:90px;" data-lang-key="th-p20">Points /20</th>
+                <th style="width:130px;" data-lang-key="th-note">Note obtenue</th>
+                <th style="width:170px;" data-lang-key="th-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="notationBody"></tbody>
+            <tfoot>
+              <tr class="notation-total-row">
+                <td colspan="2" data-lang-key="th-total">TOTAL</td>
+                <td id="notifFoot100">100</td>
+                <td id="notifFoot20">20</td>
+                <td><b id="notifFootNote">—</b></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p class="gest-empty" id="notationEmpty" style="display:none;">Aucun projet disponible — créez d'abord un projet dans la page « Fiche Projet ».</p>
+
+        <!-- Barème d'appréciation -->
+        <h3 class="rf-sub" style="margin-top:1.6rem;"><i class="fas fa-graduation-cap"></i> <span data-lang-key="bareme-h">Barème d'appréciation</span></h3>
+        <div class="table-wrap">
+          <table class="gest-table bareme-table">
+            <thead>
+              <tr>
+                <th data-lang-key="bareme-20">Note /20</th>
+                <th data-lang-key="bareme-100">Note /100</th>
+                <th data-lang-key="bareme-app">Appréciation</th>
+                <th style="width:190px;" data-lang-key="bareme-note">Note obtenue</th>
+              </tr>
+            </thead>
+            <tbody id="baremeBody"></tbody>
+          </table>
+        </div>
+        <div class="bareme-legend" id="baremeLegend"></div>
+
+        <!-- Notes finales des stagiaires (après finalisation du projet) -->
+        <div class="notation-final">
+          <div class="notation-final-head">
+            <h3 class="rf-sub" style="margin:0;"><i class="fas fa-award"></i> <span data-lang-key="final-h">Notes finales des stagiaires</span></h3>
+            <div class="action-buttons" style="margin:0;">
+              <button class="btn btn-primary" id="btnFinaliser" onclick="notationFinaliser()"><i class="fas fa-flag-checkered"></i> <span data-lang-key="b-finaliser">Finaliser le projet</span></button>
+              <button class="btn btn-danger" id="btnAnnulerFinal" onclick="notationAnnulerFinal()" style="display:none;"><i class="fas fa-rotate-left"></i> <span data-lang-key="b-annuler-final">Annuler la finalisation</span></button>
+            </div>
+          </div>
+
+          <div class="final-badge" id="finalBadge" style="display:none;">
+            <i class="fas fa-circle-check"></i>
+            <span data-lang-key="final-badge">Projet finalisé</span>
+            <b id="finalDate"></b>
+            <b id="finalTotal"></b>
+          </div>
+
+          <div class="send-all" id="sendAll" style="display:none;">
+            <span class="send-all-lbl" data-lang-key="final-auto">Envoi automatique à tous les stagiaires :</span>
+            <div class="send-btns">
+              <button type="button" class="send-btn" data-canal="whatsapp" title="WhatsApp" onclick="notationEnvoyerTous('whatsapp')"><i class="fab fa-whatsapp"></i></button>
+              <button type="button" class="send-btn" data-canal="messenger" title="Messenger" onclick="notationEnvoyerTous('messenger')"><i class="fab fa-facebook-messenger"></i></button>
+              <button type="button" class="send-btn" data-canal="telegram" title="Telegram" onclick="notationEnvoyerTous('telegram')"><i class="fab fa-telegram"></i></button>
+              <button type="button" class="send-btn" data-canal="sms" title="SMS" onclick="notationEnvoyerTous('sms')"><i class="fas fa-comment-sms"></i></button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="gest-table notation-table final-table">
+              <thead>
+                <tr>
+                  <th style="width:42px;">N°</th>
+                  <th data-lang-key="final-stag">Stagiaire</th>
+                  <th style="width:140px;" data-lang-key="final-n20">Note finale /20</th>
+                  <th style="width:140px;" data-lang-key="final-n100">Note finale /100</th>
+                  <th data-lang-key="final-app">Appréciation</th>
+                  <th style="width:170px;" data-lang-key="final-tel">Téléphone</th>
+                  <th style="width:190px;" data-lang-key="final-send">Envoyer la note</th>
+                </tr>
+              </thead>
+              <tbody id="finalBody"></tbody>
+            </table>
+          </div>
+          <p class="gest-empty" id="finalVide" style="display:none;"><span data-lang-key="final-vide">Aucun stagiaire dans ce projet — ajoutez-les dans la page « Fiche Projet ».</span></p>
+          <p class="gest-empty" id="finalPending" style="display:none;"><span data-lang-key="final-attente">Projet non finalisé : cliquez sur « Finaliser le projet » pour enregistrer les notes finales de chaque stagiaire.</span></p>
+          <div class="repart" id="notationRepart"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="app-page" id="page-archive">
+      <section class="gest-section">
+        <h2><i class="fas fa-box-archive"></i> <span data-lang-key="h-archive">Archive des Projets</span> <span class="auto-note"><i class="fas fa-shield-alt"></i> Réservé à l'administrateur</span></h2>
+        <div class="rf-formula">
+          <i class="fas fa-info-circle"></i>
+          <span data-lang-key="archive-info">Une copie de chaque projet est archivée automatiquement (nom, date et heure). Chaque archive est téléchargeable en Word ou PDF et imprimable.</span>
+        </div>
+        <div class="arch-stats">
+          <div class="arch-stat"><b id="archTotal">0</b><span data-lang-key="arch-lbl-total">Archives</span></div>
+          <div class="arch-stat"><b id="archDernier">—</b><span data-lang-key="arch-lbl-last">Dernière archive</span></div>
+        </div>
+        <div class="fiche-export">
+          <span class="fiche-export-label"><i class="fas fa-box-archive"></i> Archivage :</span>
+          <button class="btn btn-accent" onclick="archiverDepuisFiche(true)"><i class="fas fa-box-archive"></i> <span data-lang-key="b-archiver">Archiver le projet sélectionné</span></button>
+          <button class="btn btn-primary" onclick="archiverTout()"><i class="fas fa-layer-group"></i> <span data-lang-key="b-archiver-tout">Archiver tous les projets</span></button>
+          <button class="btn btn-danger" onclick="archiveVider()"><i class="fas fa-trash"></i> <span data-lang-key="b-archiver-vider">Vider l'archive</span></button>
+        </div>
+        <div class="repart" id="archRepart"></div>
+        <div class="results-table-container">
+          <table class="results-table gest-table">
+            <thead>
+              <tr>
+                <th data-lang-key="th-n">N°</th>
+                <th data-lang-key="th-proj">Nom du projet</th>
+                <th data-lang-key="th-date">Date &amp; heure</th>
+                <th style="width:190px;" data-lang-key="th-niv">Niveau /20</th>
+                <th data-lang-key="th-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="archBody"></tbody>
+          </table>
+        </div>
+        <p class="arch-empty" id="archEmpty" data-lang-key="arch-empty">Aucune archive pour le moment — une copie est créée automatiquement à chaque sauvegarde d'un projet.</p>
+      </section>
+    </section>
+
+      <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+  <!-- ===== Paramètres ===== -->
+    <section class="app-page" id="page-parametres">
+      <section class="settings-section locked" id="settingsSection">
+        <h2><i class="fas fa-palette"></i> <span data-lang-key="h-params">Paramètres</span> de l'interface <span class="auto-note"><i class="fas fa-shield-alt"></i> Réservé à l'administrateur</span></h2>
+        <div class="settings-banner">
+          <span class="locked-only"><i class="fas fa-lock"></i> Paramètres verrouillés — Mot de passe requis pour modifier l'interface.</span>
+          <span class="unlocked-only"><i class="fas fa-unlock-alt"></i> Paramètres déverrouillés.</span>
+          <button class="btn btn-primary" id="btnUnlockSettings" onclick="openSettingsLock()"><i class="fas fa-unlock-alt"></i> <span data-lang-key="b-deverrouiller">Déverrouiller</span></button>
+          <button class="btn btn-secondary" id="btnLockSettings" onclick="lockSettings()" disabled><i class="fas fa-lock"></i> Verrouiller</button>
+        </div>
+        <div class="rf-formula">
+          <i class="fas fa-info-circle"></i>
+          <span>Personnalisez les couleurs du thème, le titre du logiciel et le nom du professeur. Les modifications sont enregistrées sur ce poste.</span>
+        </div>
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label><i class="fas fa-palette"></i> Couleur principale</label>
+            <input type="color" id="setPrimary" value="#0ea5e9" disabled>
+          </div>
+          <div class="settings-field">
+            <label><i class="fas fa-leaf"></i> Couleur secondaire</label>
+            <input type="color" id="setSecondary" value="#10b981" disabled>
+          </div>
+          <div class="settings-field">
+            <label><i class="fas fa-sun"></i> Couleur d'accent</label>
+            <input type="color" id="setAccent" value="#f59e0b" disabled>
+          </div>
+          <div class="settings-field">
+            <label><i class="fas fa-window-maximize"></i> Couleur de fond de l'en-tête</label>
+            <input type="color" id="setHeaderBg" value="#ffffff" disabled>
+          </div>
+          <div class="settings-field">
+            <label><i class="fas fa-heading"></i> Titre du logiciel</label>
+            <input type="text" id="setTitle" value="Les Projets des Stagiaires" disabled>
+          </div>
+          <div class="settings-field">
+            <label><i class="fas fa-door-open"></i> Titre de la page d'accès</label>
+            <input type="text" id="setLoginSlogan" value="Je m'exerce avec les Projets des Stagiaires" disabled>
+          </div>
+          <div class="settings-field">
+            <label><i class="fas fa-user-tie"></i> Nom du professeur</label>
+            <input type="text" id="setProfName" value="Douadi Nabil" disabled>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-success" onclick="saveSettings()" disabled><i class="fas fa-save"></i> Appliquer et enregistrer</button>
+          <button class="btn btn-secondary" onclick="resetSettings()" disabled><i class="fas fa-undo"></i> Réinitialiser par défaut</button>
+        </div>
+      </section>
+
+      <section class="gest-section">
+        <h2><i class="fas fa-info-circle"></i> À propos de l'application</h2>
+        <div class="rf-formula">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Plateforme pédagogique d'encadrement des projets des stagiaires — INSFP ELHIDHAB 2026, réalisée sous la direction du <strong>Professeur Douadi Nabil</strong>.</span>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-accent" onclick="projetTelechargerZip()"><i class="fas fa-file-archive"></i> <span data-lang-key="b-dl-zip">Télécharger le projet (.zip)</span></button>
+          <button class="btn btn-secondary btn-licence" onclick="openLicence()"><i class="fas fa-file-contract"></i> Licence d'utilisation</button>
+          <button class="btn btn-danger btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Se déconnecter</button>
+        </div>
+        <p class="rf-formula" style="margin-top:.7rem;">
+          <i class="fas fa-info-circle"></i>
+          <span data-lang-key="zip-info">Le fichier ZIP contient le code complet du projet séparé en 3 fichiers : <strong>HTML</strong> (structure), <strong>CSS</strong> (design) et <strong>JavaScript</strong> (logique), avec la licence d'utilisation.</span>
+        </p>
+      </section>
+    </section>
+
+    <footer class="app-footer">
+      <strong>Professeur <span id="footerProfName">Douadi Nabil</span></strong> · INSFP ELHidhab
+      <div class="copyright-line">
+        <i class="fas fa-copyright"></i> 2026 — Tous droits réservés · Professeur Douadi Nabil · Les Projets des Stagiaires
+      </div>
+      <div class="action-buttons" style="justify-content:center;">
+        <button class="btn btn-secondary btn-licence" onclick="openLicence()"><i class="fas fa-file-contract"></i> Licence</button>
+        <button class="btn btn-primary btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-lang-key="b-logout">Déconnexion</span></button>
+      </div>
+    <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+    </footer>
+  </div>
+
+  <!-- ===== MODAL Déverrouiller paramètres ===== -->
+  <div class="settings-lock-modal" id="settingsLockModal">
+    <div class="settings-lock-card">
+      <div class="settings-lock-header"><i class="fas fa-unlock-alt"></i> Déverrouiller les paramètres</div>
+      <div class="settings-lock-body">
+        <p>Les paramètres de l'interface sont réservés à l'administrateur. Saisissez le mot de passe pour modifier le thème et le contenu.</p>
+        <div class="login-field">
+          <label><i class="fas fa-lock"></i> Mot de passe administrateur</label>
+          <input type="password" id="settingsLockPass" placeholder="••••••••">
+        </div>
+        <div class="login-error" id="settingsLockError"></div>
+        <div class="settings-lock-actions">
+          <button class="btn btn-secondary" onclick="closeSettingsLock()"><i class="fas fa-times"></i> <span data-lang-key="b-annuler">Annuler</span></button>
+          <button class="btn btn-primary" onclick="unlockSettings()"><i class="fas fa-unlock-alt"></i> <span data-lang-key="b-deverrouiller">Déverrouiller</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL Modification réservée à l'administrateur ===== -->
+  <div class="settings-lock-modal" id="adminGateModal">
+    <div class="settings-lock-card">
+      <div class="settings-lock-header"><i class="fas fa-user-shield"></i> Réservé à l'administrateur</div>
+      <div class="settings-lock-body">
+        <p>La modification des <strong>logos</strong> et des <strong>photos de la galerie</strong> est réservée à l'administrateur. Saisissez le mot de passe pour continuer.</p>
+        <div class="login-field">
+          <label><i class="fas fa-lock"></i> Mot de passe administrateur</label>
+          <input type="password" id="adminGatePass" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();validerAdminGate();}">
+        </div>
+        <div class="login-error" id="adminGateError"></div>
+        <div class="settings-lock-actions">
+          <button class="btn btn-secondary" onclick="fermerAdminGate()"><i class="fas fa-times"></i> Annuler</button>
+          <button class="btn btn-primary" onclick="validerAdminGate()"><i class="fas fa-unlock-alt"></i> Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+    <!-- ===== MODAL Licence ===== -->
+  <div class="modal-licence" id="licenceModal">
+    <div class="settings-lock-card">
+      <div class="settings-lock-header licence-header"><i class="fas fa-file-contract"></i> Licence d'utilisation</div>
+      <div class="settings-lock-body licence-body">
+        <h3>Les Projets des Stagiaires — INSFP ELHIDHAB 2026</h3>
+        <p>Application de gestion scolaire — © 2026 <strong>Professeur Douadi Nabil</strong> — INSFP El Hidhab, Sétif, Algérie. Tous droits réservés.</p>
+        <div class="licence-scroll">
+          <h4>1. Objet</h4>
+          <p>La présente licence régit l'utilisation du Logiciel, incluant son code source HTML, CSS et JavaScript, ses interfaces et sa documentation.</p>
+          <h4>2. Propriété</h4>
+          <p>Le Logiciel est une œuvre originale créée par le Professeur Douadi Nabil, qui en conserve l'intégralité des droits patrimoniaux et moraux, conformément à l'ordonnance n° 03-05 du 19 juillet 2003 (Algérie).</p>
+          <h4>3. Droits accordés</h4>
+          <p>Droit d'usage <strong>personnel et/ou institutionnel, non exclusif, non transférable</strong>, limité à la gestion des stagiaires, des présences et de la messagerie interne de l'établissement destinataire, <strong>sans droit de sous-licence</strong>.</p>
+          <h4>4. Interdictions</h4>
+          <p>Sauf autorisation écrite préalable, il est strictement interdit de : copier, reproduire ou dupliquer le Logiciel ; modifier, décompiler ou tenter d'extraire le code source ; distribuer, revendre, louer ou céder le Logiciel ; retirer ou altérer les mentions de copyright ; utiliser le Logiciel dans un autre projet.</p>
+          <h4>5. Absence de garantie</h4>
+          <p>Le Logiciel est fourni « en l'état », sans garantie d'aucune sorte, l'auteur n'étant responsable d'aucun dommage, y compris la perte de données.</p>
+          <h4>6. Durée et résiliation</h4>
+          <p>La licence prend effet dès l'utilisation et peut être résiliée de plein droit en cas de non-respect des conditions ci-dessus.</p>
+          <h4>7. Droit applicable</h4>
+          <p>Droit algérien. Tout litige relève de la compétence des juridictions algériennes.</p>
+          <h4>Contact</h4>
+          <p>Professeur Douadi Nabil — INSFP El Hidhab, Sétif<br>Salutation82nobl@gmail.com — Tél. : +213 774 89 20 34 / +213 659 97 87 55</p>
+        </div>
+        <p class="licence-foot">Le détail complet des conditions figure dans le fichier <strong>LICENCE.md</strong> accompagnant le projet.</p>
+        <div class="settings-lock-actions">
+          <button class="btn btn-primary" onclick="closeLicence()"><i class="fas fa-check"></i> J'ai compris</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="wm" id="wmProtec" aria-hidden="true"></div>
+
+  <div class="blocage-ecran" id="blocageProtec">
+    <div class="bx">
+      <i class="fas fa-shield-halved"></i>
+      <h2>Licence invalide — utilisation bloquée</h2>
+      <p>Cette application est protégée par le Professeur Douadi Nabil (© 2026, INSFP El Hidhab).<br>
+      Les marques de propriété intellectuelle du Logiciel ont été altérées : le fichier a été modifié, dupliqué ou amputé de ses mentions d'auteur.</p>
+      <p>Merci de restaurer le fichier original et de contacter l'auteur pour toute copie autorisée :<br>
+      <code>Salutation82nobl@gmail.com</code> — Tél. : +213 774 89 20 34</p>
+    </div>
+  </div>
+
+<!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+      
+    <script src="script.js"></script>
+
+<!--PROPRIETE-DN-INSFP-ELHIDHAB-2026-->
+</body>
+</html>
