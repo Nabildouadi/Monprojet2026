@@ -1,5 +1,15 @@
 ﻿
-    // ===== PROTECTION CONTRE LA COPIE ET LE PIRATAGE =====
+    // ===== API HELPER (Remplacement localStorage) =====
+    async function apiCall(action, data = {}) {
+        const payload = { action, ...data };
+        const response = await fetch('api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        return await response.json();
+    }
+
     // © 2026 Professeur Douadi Nabil - INSFP El Hidhab, Sétif.
     // Toute copie, modification ou redistribution non autorisée est interdite
     // (Licence d'utilisation - ordonnance n° 03-05 du 19 juillet 2003, Algérie).
@@ -951,7 +961,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       return (raw || '').replace(/[\s.-]/g, '');
     }
 
-    function stuConnexion() {
+    async function stuConnexion() {
       const tel = stuNormalize(document.getElementById('stuTel').value);
       const pass = document.getElementById('stuPass').value.trim();
       const err = document.getElementById('stuError');
@@ -965,13 +975,16 @@ const STU_KEY = 'ps_stagiaire_tel';
         err.textContent = '⚠ Veuillez saisir votre numéro de téléphone et votre mot de passe.';
         return;
       }
-      const profil = profileList.find(function(p) { return p.phone === tel; });
-      if (!profil || (passHash(pass) !== profil.pass && pass !== profil.pass)) {
+
+      const res = await apiCall('login_stu', { phone: tel, pass });
+      if (res.status !== 'success') {
         marquerEchecAuth();
-        err.textContent = '⚠ Numéro ou mot de passe incorrect. Contactez votre professeur pour toute assistance.';
+        err.textContent = '⚠ ' + (res.message || 'Numéro ou mot de passe incorrect.');
         document.getElementById('stuPass').value = '';
         return;
       }
+
+      const profil = res.data;
       reussiteAuth();
       sessionStorage.setItem(SESSION_KEY, '1');
       sessionStorage.setItem(SESSION_TYPE_KEY, 'stagiaire');
@@ -1015,7 +1028,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       document.getElementById('stuTel').value = '';
     }
 
-    function handleLogin() {
+    async function handleLogin() {
       const userInput = document.getElementById('loginUser').value.trim();
       const passInput = document.getElementById('loginPass').value.trim();
       const errorEl = document.getElementById('loginError');
@@ -1031,7 +1044,9 @@ const STU_KEY = 'ps_stagiaire_tel';
         return;
       }
 
-      if (identifiantHash(userInput) === ADMIN_USER_HASH && passHash(passInput) === ADMIN_PASS_HASH) {
+      const res = await apiCall('login_prof', { userHash: identifiantHash(userInput), passHash: passHash(passInput) });
+
+      if (res.status === 'success') {
         reussiteAuth();
         sessionStorage.setItem(SESSION_KEY, '1');
         sessionStorage.setItem(SESSION_TYPE_KEY, 'admin');
@@ -1045,11 +1060,11 @@ const STU_KEY = 'ps_stagiaire_tel';
         appliquerRole();
         switchAppPage('page-profile');
         setTimeout(function() {
-          showToast('Bienvenue, Professeur ' + settingsForm.profName + ' !', 'fas fa-user-shield');
+          showToast('Bienvenue, Professeur ' + res.prof_name + ' !', 'fas fa-user-shield');
         }, 200);
       } else {
         marquerEchecAuth();
-        errorEl.textContent = '⚠ Identifiant ou mot de passe incorrect.';
+        errorEl.textContent = '⚠ ' + (res.message || 'Identifiant ou mot de passe incorrect.');
         document.getElementById('loginPass').value = '';
         document.getElementById('loginPass').focus();
       }
@@ -1123,15 +1138,12 @@ const STU_KEY = 'ps_stagiaire_tel';
       document.getElementById('profPass').value = /^0[0-9]{9}$/.test(phone) ? phone.slice(-4) : '';
     }
 
-    function profLoad() {
-      try {
-        const raw = JSON.parse(localStorage.getItem(PROFILES_KEY));
-        profileList = Array.isArray(raw) ? raw : [];
-      } catch (e) { profileList = []; }
-      try {
-        const raw = JSON.parse(localStorage.getItem(SPECIALITES_KEY));
-        specialiteList = Array.isArray(raw) && raw.length ? raw : PROFILE_SPECIALITES_DEFAUT.slice();
-      } catch (e) { specialiteList = PROFILE_SPECIALITES_DEFAUT.slice(); }
+    async function profLoad() {
+      const res = await apiCall('get_profiles');
+      if (res.status === 'success') {
+        profileList = res.profils || [];
+        specialiteList = res.specialites && res.specialites.length ? res.specialites : PROFILE_SPECIALITES_DEFAUT.slice();
+      }
       profRendreSpecialites();
       profRender();
     }
@@ -1165,9 +1177,8 @@ const STU_KEY = 'ps_stagiaire_tel';
       });
     }
 
-    function profSpecPersist() {
-      try { localStorage.setItem(SPECIALITES_KEY, JSON.stringify(specialiteList)); }
-      catch (e) { showToast('Stockage saturé', 'fas fa-exclamation-triangle', true); }
+    async function profSpecPersist() {
+      await apiCall('save_specialites', { specialites: specialiteList });
     }
 
     function profSpecSauvegarder() {
@@ -1232,14 +1243,11 @@ const STU_KEY = 'ps_stagiaire_tel';
       showToast('Spécialité supprimée' + (touches ? ' (' + touches + ' profil(s) sans spécialité)' : ''), 'fas fa-trash');
     }
 
-    function profPersist() {
-      try {
-        localStorage.setItem(PROFILES_KEY, JSON.stringify(profileList));
-        return true;
-      } catch (e) {
-        showToast('Stockage saturé — retirez une photo pour alléger le fichier', 'fas fa-exclamation-triangle', true);
-        return false;
+    async function profPersist() {
+      for (const p of profileList) {
+        await apiCall('save_profile', { profil: p });
       }
+      return true;
     }
 
     function profShowPhoto(data) {
@@ -1374,50 +1382,61 @@ const STU_KEY = 'ps_stagiaire_tel';
       };
     }
 
-    function profAjouter() {
+    async function profAjouter() {
       const data = profReadForm();
       if (!data) return;
       if (profileList.some(function(p) { return p.phone === data.phone; })) {
         showToast('Ce numéro est déjà enregistré', 'fas fa-exclamation-triangle', true);
         return;
       }
-      data.id = Date.now() + '' + Math.floor(Math.random() * 1000);
-      profileList.push(data);
-      if (!profPersist()) { profileList.pop(); profRender(); return; }
-      profVider();
-      showToast('Profil ajouté : ' + data.nom + ' ' + data.prenom, 'fas fa-user-plus');
+
+      const res = await apiCall('save_profile', { profil: data });
+      if (res.status === 'success') {
+          await profLoad(); // Recharger pour avoir les bons IDs
+          profVider();
+          showToast('Profil ajouté : ' + data.nom + ' ' + data.prenom, 'fas fa-user-plus');
+      } else {
+          showToast('Erreur lors de l\'ajout', 'fas fa-exclamation-triangle', true);
+      }
     }
 
-    function profModifier() {
+    async function profModifier() {
       if (profileEditingId === null) {
         showToast('Sélectionnez d\'abord un profil dans la liste (cliquez sur sa ligne)', 'fas fa-exclamation-triangle', true);
         return;
       }
       const data = profReadForm();
       if (!data) return;
-      if (profileList.some(function(p) { return p.phone === data.phone && p.id !== profileEditingId; })) {
-        showToast('Ce numéro est déjà utilisé par un autre stagiaire', 'fas fa-exclamation-triangle', true);
-        return;
+
+      // Ajouter l'ID de la base de données
+      data.id_db = profileEditingId;
+
+      const res = await apiCall('save_profile', { profil: data });
+      if (res.status === 'success') {
+          await profLoad();
+          profVider();
+          showToast('Profil modifié', 'fas fa-pen');
+      } else {
+          showToast('Erreur lors de la modification', 'fas fa-exclamation-triangle', true);
       }
-      const target = profileList.find(function(p) { return p.id === profileEditingId; });
-      if (!target) return;
-      Object.keys(data).forEach(function(k) { target[k] = data[k]; });
-      if (!profPersist()) return;
-      profVider();
-      showToast('Profil modifié', 'fas fa-pen');
     }
 
-    function profSupprimer() {
+    async function profSupprimer() {
       if (profileEditingId === null) {
         showToast('Sélectionnez d\'abord un profil dans la liste (cliquez sur sa ligne)', 'fas fa-exclamation-triangle', true);
         return;
       }
       const target = profileList.find(function(p) { return p.id === profileEditingId; });
       if (!confirm('Supprimer ce profil stagiaire ?')) return;
-      profileList = profileList.filter(function(p) { return p.id !== profileEditingId; });
-      profPersist();
-      profVider();
-      showToast('Profil supprimé' + (target ? (' : ' + target.nom + ' ' + (target.prenom || '')) : ''), 'fas fa-trash');
+
+      const res = await apiCall('delete_profile', { phone: target.phone });
+      if (res.status === 'success') {
+          await profLoad();
+          profVider();
+          showToast('Profil supprimé', 'fas fa-trash');
+      } else {
+          showToast('Erreur lors de la suppression', 'fas fa-exclamation-triangle', true);
+      }
     }
 
     function profFormRempli() {
@@ -1427,20 +1446,21 @@ const STU_KEY = 'ps_stagiaire_tel';
              document.getElementById('profSemestre').value !== '' || profilePhotoData !== '';
     }
 
-    function profSauvegarder() {
+    async function profSauvegarder() {
       // Si un profil est sélectionné -> met à jour la fiche sélectionnée
       if (profileEditingId !== null && profileList.some(function(p) { return p.id === profileEditingId; })) {
-        profModifier();
+        await profModifier();
         return;
       }
       // Sinon, si le formulaire est rempli -> crée la fiche manquante
       if (profFormRempli()) {
-        profAjouter();
+        await profAjouter();
         return;
       }
       // Sinon : sauvegarde de la liste telle quelle
-      if (profPersist()) {
-        profRender();
+      const res = await profPersist();
+      if (res) {
+        await profLoad();
         showToast('Profils stagiaires sauvegardés (' + profileList.length + ')', 'fas fa-save');
       }
     }
@@ -1608,11 +1628,11 @@ const STU_KEY = 'ps_stagiaire_tel';
       return { id: id, nom: '', membres: [], objectifs: [], etapes: [], materiel: [], methode: '' };
     }
 
-    function ficheLoad() {
-      try {
-        const raw = JSON.parse(localStorage.getItem(FICHES_KEY));
-        ficheList = Array.isArray(raw) ? raw : [];
-      } catch (e) { ficheList = []; }
+    async function ficheLoad() {
+      const res = await apiCall('get_projets');
+      if (res.status === 'success') {
+        ficheList = res.projets || [];
+      }
       if (ficheId === null && ficheList.length) ficheId = ficheList[0].id;
       ficheToutRendre();
     }
@@ -1621,18 +1641,22 @@ const STU_KEY = 'ps_stagiaire_tel';
       return ficheList.find(function(p) { return p.id === ficheId; }) || null;
     }
 
-    function ficheSauvegarder() {
-      try {
-        const p = ficheCourant();
-        if (p) { if (!p.cree) p.cree = new Date().toISOString(); p.modif = Date.now(); }
-        localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList));
-        archiverProjet(p);
+    async function ficheSauvegarder() {
+      const p = ficheCourant();
+      if (!p) return;
+
+      const res = await apiCall('save_projet', { projet: p });
+      if (res.status === 'success') {
+        if (res.projet_id) p.id = res.projet_id.toString();
         const flash = document.getElementById('ficheFlash');
-        flash.classList.add('on');
-        setTimeout(function() { flash.classList.remove('on'); }, 1200);
-        showToast('Fiche projet sauvegardée et archivée', 'fas fa-save');
-      } catch (e) {
-        showToast('Sauvegarde impossible (stockage saturé)', 'fas fa-exclamation-triangle', true);
+        if (flash) {
+            flash.classList.add('on');
+            setTimeout(function() { flash.classList.remove('on'); }, 1200);
+        }
+        showToast('Fiche projet sauvegardée dans la base de données', 'fas fa-save');
+        await ficheLoad();
+      } else {
+        showToast('Erreur lors de la sauvegarde du projet', 'fas fa-exclamation-triangle', true);
       }
     }
 
