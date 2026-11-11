@@ -59,7 +59,7 @@ ETAPE 2 - LANCER L'APPLICATION
 
 IDENTIFIANTS PROFESSEUR (administrateur)
   Identifiant : profdouadi
-  Mot de passe : admin2026
+  Mot de passe : 00000000
   (modifiable dans « Paramètres » > « Sécurité — Modifier le mot de passe »)
 
 REGLAGES DE CONNEXION MYSQL
