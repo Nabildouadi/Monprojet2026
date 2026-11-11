@@ -1,0 +1,293 @@
+/* ============================================================
+   INTERFACE 3D ANIMÉE — Les Projets des Stagiaires
+   Couche d'effets visuels (aucune donnée n'est modifiée).
+
+   - décor animé : aurores colorées + sol quadrillé en perspective
+   - panneaux qui s'inclinent en 3D au passage de la souris
+   - boutons et onglets avec relief
+   - transitions de page en perspective
+   - bouton « 3D » en bas à gauche pour tout activer/désactiver
+
+   Tout est désactivé automatiquement à l'impression et lors des
+   exports PDF / DOC / DOCX.
+   ============================================================ */
+
+/* ---------- Décor de fond ---------- */
+.d3-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .9s ease;
+}
+body.d3-on .d3-bg { opacity: 1; }
+
+.d3-bg .d3-blob {
+  position: absolute;
+  width: 46vmax;
+  height: 46vmax;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .45;
+  animation: d3Float 26s ease-in-out infinite alternate;
+}
+.d3-bg .d3-blob.b1 {
+  top: -18vmax; left: -12vmax;
+  background: radial-gradient(circle at 35% 35%, rgba(14,165,233,.60), transparent 68%);
+}
+.d3-bg .d3-blob.b2 {
+  bottom: -20vmax; right: -14vmax;
+  background: radial-gradient(circle at 60% 40%, rgba(16,185,129,.48), transparent 68%);
+  animation-delay: -9s;
+}
+.d3-bg .d3-blob.b3 {
+  top: 32%; left: 52%;
+  width: 34vmax; height: 34vmax;
+  background: radial-gradient(circle at 50% 50%, rgba(245,158,11,.38), transparent 68%);
+  animation-delay: -17s;
+}
+
+@keyframes d3Float {
+  0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate3d(4vmax, -3vmax, 0) scale(1.12) rotate(12deg); }
+  100% { transform: translate3d(-3vmax, 4vmax, 0) scale(.95) rotate(-8deg); }
+}
+
+/* Sol quadrillé « synthwave » en perspective */
+.d3-floor {
+  position: fixed;
+  left: -20%;
+  right: -20%;
+  bottom: -12vh;
+  height: 55vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: perspective(420px) rotateX(62deg);
+  transform-origin: bottom center;
+  background-image:
+    linear-gradient(to right, rgba(14,165,233,.24) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14,165,233,.20) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: linear-gradient(to top, #000 4%, transparent 82%);
+  mask-image: linear-gradient(to top, #000 4%, transparent 82%);
+  transition: opacity 1s ease;
+  animation: d3GridMove 6s linear infinite;
+}
+body.d3-on .d3-floor { opacity: .5; }
+
+@keyframes d3GridMove {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 0 46px, 0 46px; }
+}
+
+/* Le contenu passe au-dessus du décor */
+body.d3-on .app-container,
+body.d3-on .accueil-page {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Panneaux inclinables ---------- */
+body.d3-on .d3-tilt {
+  transform: perspective(1100px)
+             rotateX(var(--d3-rx, 0deg))
+             rotateY(var(--d3-ry, 0deg))
+             translateZ(0);
+  transform-style: preserve-3d;
+  transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease;
+}
+body.d3-on .d3-tilt.is-tilting {
+  transition: transform .07s linear, box-shadow .25s ease;
+  will-change: transform;
+  box-shadow: -12px 18px 42px rgba(15,23,42,.16),
+              0 4px 10px rgba(15,23,42,.08);
+}
+
+/* ---------- Rendu des boutons (relief 3D) ---------- */
+body.d3-on .btn {
+  transform: translateZ(0);
+  box-shadow: 0 4px 0 rgba(15,23,42,.16),
+              0 8px 16px rgba(15,23,42,.12);
+}
+body.d3-on .btn:hover {
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 6px 0 rgba(15,23,42,.14),
+              0 14px 24px rgba(15,23,42,.16);
+}
+body.d3-on .btn:active {
+  transform: translateY(1px) translateZ(0);
+  box-shadow: 0 2px 0 rgba(15,23,42,.20),
+              0 4px 8px rgba(15,23,42,.12);
+}
+
+/* ---------- Onglets de pages ---------- */
+body.d3-on .page-tab {
+  transform: translateZ(0);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+body.d3-on .page-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(14,165,233,.25);
+}
+body.d3-on .page-tab.active {
+  box-shadow: 0 3px 0 rgba(2,132,199,.5),
+              0 10px 20px rgba(14,165,233,.28);
+}
+
+/* ---------- Transition de page en perspective ---------- */
+body.d3-on .app-page.active {
+  animation: d3PageIn .55s cubic-bezier(.22,.8,.28,1) both;
+  transform-origin: top center;
+}
+@keyframes d3PageIn {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateX(7deg) translateY(26px) scale(.99);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1400px) rotateX(0deg) translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ---------- Page d'accueil ---------- */
+body.d3-on .accueil-access-card {
+  transform-style: preserve-3d;
+  transition: transform .35s cubic-bezier(.2,.7,.3,1),
+              box-shadow .35s ease,
+              background .35s ease,
+              border-color .35s ease;
+}
+body.d3-on .accueil-access-card:hover {
+  transform: translateY(-10px) rotateX(6deg) rotateY(-4deg) scale(1.03);
+  border-color: #4fc3f7;
+  background: rgba(79,195,247,.22);
+  box-shadow: 0 24px 50px rgba(0,0,0,.45),
+              0 0 30px rgba(79,195,247,.35);
+}
+body.d3-on .accueil-access-icon {
+  transition: transform .45s cubic-bezier(.2,.7,.3,1);
+}
+body.d3-on .accueil-access-card:hover .accueil-access-icon {
+  transform: translateZ(40px) scale(1.12) rotate(-6deg);
+}
+
+body.d3-on .accueil-logo {
+  transition: transform .4s cubic-bezier(.2,.7,.3,1), box-shadow .4s ease;
+}
+body.d3-on .accueil-logo:hover {
+  transform: perspective(800px) rotateY(10deg) rotateX(-6deg) scale(1.05);
+  box-shadow: 0 18px 38px rgba(0,0,0,.45);
+}
+
+body.d3-on .accueil-main-title {
+  animation: d3TitleFloat 7s ease-in-out infinite;
+}
+@keyframes d3TitleFloat {
+  0%, 100% { transform: perspective(1200px) rotateX(0deg) translateY(0); }
+  50%      { transform: perspective(1200px) rotateX(2.5deg) translateY(-6px); }
+}
+
+/* ---------- Icônes de titres de sections ---------- */
+body.d3-on .gest-section h2 > i,
+body.d3-on .settings-section h2 > i,
+body.d3-on .fiche-block-head > i,
+body.d3-on .conseil-section h2 > i {
+  display: inline-block;
+  transition: transform .35s cubic-bezier(.2,.7,.3,1);
+}
+body.d3-on .gest-section h2:hover > i,
+body.d3-on .settings-section h2:hover > i,
+body.d3-on .fiche-block-head:hover > i,
+body.d3-on .conseil-section h2:hover > i {
+  transform: perspective(500px) rotateY(22deg) rotateX(-10deg) scale(1.15);
+}
+
+/* ---------- Bouton d'activation ---------- */
+.d3-toggle {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(15,23,42,.88), rgba(30,41,59,.88));
+  color: #fff;
+  font-family: var(--font-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(15,23,42,.32);
+  transition: transform .2s ease, box-shadow .2s ease;
+  opacity: .92;
+}
+.d3-toggle:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 30px rgba(15,23,42,.4);
+  opacity: 1;
+}
+.d3-toggle .d3-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+  box-shadow: 0 0 0 3px rgba(100,116,139,.25);
+  transition: background .3s ease, box-shadow .3s ease;
+}
+body.d3-on .d3-toggle .d3-dot {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e, 0 0 0 3px rgba(34,197,94,.22);
+}
+
+/* ---------- Petits écrans : on garde les effets légers ---------- */
+@media (max-width: 600px) {
+  .d3-toggle {
+    left: 8px;
+    bottom: 8px;
+    padding: 7px 11px;
+    font-size: 11px;
+  }
+  body.d3-on .d3-floor { display: none; }
+  body.d3-on .d3-bg .d3-blob { filter: blur(52px); opacity: .35; }
+}
+
+/* ---------- Accessibilité : mouvement réduit ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .d3-bg .d3-blob,
+  .d3-floor,
+  body.d3-on .accueil-main-title,
+  body.d3-on .app-page.active {
+    animation: none !important;
+  }
+  body.d3-on .d3-tilt {
+    transform: none !important;
+  }
+}
+
+/* ---------- Impression : aucun effet ---------- */
+@media print {
+  .d3-bg,
+  .d3-floor,
+  .d3-toggle {
+    display: none !important;
+  }
+  body.d3-on .d3-tilt,
+  body.d3-on .app-page.active,
+  body.d3-on .accueil-main-title {
+    transform: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+}

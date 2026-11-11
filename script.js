@@ -1,13 +1,239 @@
 ﻿
-    // ===== API HELPER (Remplacement localStorage) =====
+    // ============================================================
+    // COUCHE DE DONNÉES UNIFIÉE — UN SEUL CODE, DEUX MODES
+    //   • Mode NORMAL   : PC avec serveur PHP + MySQL (api.php)
+    //   • Mode PORTABLE : clé USB / dossier (localStorage)
+    // Détection : file:// => portable, http(s):// => normal.
+    // Surcharge possible : index.html?mode=portable ou ?mode=normal
+    // ============================================================
+    let APP_MODE = (function() {
+      try {
+        const p = new URLSearchParams(location.search).get('mode');
+        if (p === 'portable' || p === 'normal') return p;
+      } catch (e) {}
+      if (typeof window.APP_MODE === 'string' && (window.APP_MODE === 'normal' || window.APP_MODE === 'portable')) {
+        return window.APP_MODE;
+      }
+      return location.protocol === 'file:' ? 'portable' : 'normal';
+    })();
+    window.APP_MODE = APP_MODE;
+
+    const LS = {
+      get: function(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
+      set: function(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+      json: function(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+      setJson: function(k, v) { return LS.set(k, JSON.stringify(v)); },
+      del: function(k) { try { localStorage.removeItem(k); } catch (e) {} }
+    };
+
+    // Paramètre d'interface : toujours en local, et aussi en base en mode normal
+    function kvSet(key, value) {
+      const ok = LS.set(key, value);
+      if (APP_MODE === 'normal') {
+        apiCall('save_settings', { key: key, value: value }).catch(function() {});
+      }
+      return ok;
+    }
+    function kvDel(key) {
+      LS.del(key);
+      if (APP_MODE === 'normal') {
+        apiCall('save_settings', { key: key, value: '' }).catch(function() {});
+      }
+    }
+
+    // ---- Backend local utilisé en mode portable ----
+    const LOCAL_DB = {
+      profilesKey: 'ps_profiles',
+      specialitesKey: 'ps_specialites',
+      fichesKey: 'ps_fiches_projets',
+      settingsKey: 'ps_settings',
+      nextId: function() { return Date.now().toString() + Math.floor(Math.random() * 1000); },
+      readProfiles: function() { const a = LS.json(this.profilesKey, []); return Array.isArray(a) ? a : []; },
+      writeProfiles: function(a) { return LS.setJson(this.profilesKey, a); },
+      readSpecialites: function() { const a = LS.json(this.specialitesKey, null); return Array.isArray(a) && a.length ? a : null; },
+      readProjets: function() { const a = LS.json(this.fichesKey, []); return Array.isArray(a) ? a : []; },
+      writeProjets: function(a) { return LS.setJson(this.fichesKey, a); },
+      readSettings: function() { const o = LS.json(this.settingsKey, {}); return o && typeof o === 'object' ? o : {}; },
+      writeSettings: function(o) { return LS.setJson(this.settingsKey, o); }
+    };
+
+    function localCall(action, data) {
+      data = data || {};
+      switch (action) {
+        case 'ping':
+          return { status: 'success', mode: 'portable' };
+
+        case 'login_prof': {
+          if (data.userHash === ADMIN_USER_HASH && data.passHash === adminPassActuel()) {
+            const s = LS.json('ps_ui_settings', {}) || {};
+            return { status: 'success', role: 'admin', prof_name: s.profName || 'Douadi Nabil' };
+          }
+          return { status: 'error', message: 'Identifiant ou mot de passe incorrect.' };
+        }
+
+        case 'login_stu': {
+          const phone = String(data.phone || '').replace(/[\s.-]/g, '');
+          const pass = String(data.pass == null ? '' : data.pass);
+          const profil = LOCAL_DB.readProfiles().find(function(p) {
+            return String(p.phone) === phone && (p.pass === pass || String(p.pass) === pass);
+          });
+          if (profil) return { status: 'success', role: 'stagiaire', data: profil };
+          return { status: 'error', message: 'Numéro ou mot de passe incorrect.' };
+        }
+
+        case 'get_profiles': {
+          const list = LOCAL_DB.readProfiles().map(function(p, i) {
+            const id = String(p.id || (i + 1));
+            return {
+              id: id, id_db: id,
+              nom: p.nom || '', prenom: p.prenom || '',
+              phone: p.phone || '', pass: p.pass || '',
+              specialite: p.specialite || '', semestre: p.semestre || 'S1',
+              photo: p.photo || ''
+            };
+          });
+          return { status: 'success', profils: list, specialites: LOCAL_DB.readSpecialites() || [] };
+        }
+
+        case 'save_profile': {
+          const p = data.profil;
+          if (!p) return { status: 'error', message: 'Données invalides' };
+          const list = LOCAL_DB.readProfiles();
+          const id = p.id_db || p.id;
+          let idx = id ? list.findIndex(function(x) { return String(x.id) === String(id); }) : -1;
+          if (idx < 0 && p.phone) idx = list.findIndex(function(x) { return x.phone === p.phone; });
+          const rec = {
+            id: idx >= 0 ? list[idx].id : (p.id || LOCAL_DB.nextId()),
+            nom: p.nom || '', prenom: p.prenom || '', phone: p.phone || '',
+            pass: p.pass || '', specialite: p.specialite || '',
+            semestre: p.semestre || 'S1', photo: p.photo || ''
+          };
+          if (idx >= 0) list[idx] = Object.assign({}, list[idx], rec); else list.push(rec);
+          LOCAL_DB.writeProfiles(list);
+          return { status: 'success', id: rec.id };
+        }
+
+        case 'delete_profile': {
+          const phone = String(data.phone || '');
+          LOCAL_DB.writeProfiles(LOCAL_DB.readProfiles().filter(function(p) { return p.phone !== phone; }));
+          return { status: 'success' };
+        }
+
+        case 'save_specialites': {
+          const arr = (data.specialites || []).map(function(s) { return String(s).trim(); }).filter(Boolean);
+          LS.setJson(LOCAL_DB.specialitesKey, arr);
+          return { status: 'success' };
+        }
+
+        case 'get_projets': {
+          const list = LOCAL_DB.readProjets().map(function(p, i) {
+            const out = Object.assign({}, p);
+            out.id = String(p.id || (i + 1));
+            out.membres = Array.isArray(p.membres) ? p.membres : [];
+            out.objectifs = Array.isArray(p.objectifs) ? p.objectifs : [];
+            out.etapes = Array.isArray(p.etapes) ? p.etapes : [];
+            out.materiel = Array.isArray(p.materiel) ? p.materiel : [];
+            out.reactifs = Array.isArray(p.reactifs) ? p.reactifs : [];
+            out.photos = Array.isArray(p.photos) ? p.photos.slice(0, 8) : [];
+            while (out.photos.length < 8) out.photos.push('');
+            out.notes = p.notes && typeof p.notes === 'object' ? p.notes : {};
+            out.methode = p.methode || '';
+            out.resultat = p.resultat || '';
+            out.interpretation = p.interpretation || '';
+            out.cree = p.cree || new Date().toISOString();
+            out.modif = p.modif || Date.now();
+            return out;
+          });
+          return { status: 'success', projets: list };
+        }
+
+        case 'save_projet': {
+          const p = data.projet;
+          if (!p) return { status: 'error', message: 'Projet manquant' };
+          const list = LOCAL_DB.readProjets();
+          let idx = p.id ? list.findIndex(function(x) { return String(x.id) === String(p.id); }) : -1;
+          const rec = Object.assign({}, p);
+          rec.modif = Date.now();
+          if (!rec.cree) rec.cree = new Date().toISOString();
+          if (idx >= 0) {
+            rec.id = list[idx].id;
+            list[idx] = rec;
+          } else {
+            rec.id = p.id && !/^\d+$/.test(String(p.id)) ? p.id : LOCAL_DB.nextId();
+            list.push(rec);
+          }
+          LOCAL_DB.writeProjets(list);
+          return { status: 'success', projet_id: rec.id };
+        }
+
+        case 'delete_projet': {
+          const id = String(data.id == null ? '' : data.id);
+          LOCAL_DB.writeProjets(LOCAL_DB.readProjets().filter(function(p) { return String(p.id) !== id; }));
+          return { status: 'success' };
+        }
+
+        case 'get_settings': {
+          const s = LOCAL_DB.readSettings();
+          const out = {};
+          Object.keys(s).forEach(function(k) { if (k !== 'ps_settings') out[k] = s[k]; });
+          ['ps_ui_settings', 'ps_galerie_accueil', 'ps_logo_Left', 'ps_logo_Right', 'ps_archive_projets'].forEach(function(k) {
+            const v = LS.get(k, null);
+            if (v !== null) out[k] = v;
+          });
+          return { status: 'success', settings: out };
+        }
+
+        case 'save_settings': {
+          const key = data.key;
+          if (!key) return { status: 'error', message: 'Clé manquante' };
+          const s = LOCAL_DB.readSettings();
+          s[key] = data.value;
+          LOCAL_DB.writeSettings(s);
+          return { status: 'success' };
+        }
+
+        default:
+          return { status: 'error', message: 'Action inconnue : ' + action };
+      }
+    }
+
     async function apiCall(action, data = {}) {
+      if (APP_MODE === 'portable') return localCall(action, data);
+      try {
         const payload = { action, ...data };
         const response = await fetch('api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        return await response.json();
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const json = await response.json();
+        if (json && json.error) throw new Error(json.error);
+        return json;
+      } catch (e) {
+        // Serveur absent (hébergement statique, XAMPP arrêté, clé USB) :
+        // bascule automatique en mode portable pour ne pas bloquer l'application.
+        if (APP_MODE !== 'portable') {
+          APP_MODE = 'portable';
+          window.APP_MODE = 'portable';
+          if (window.console && console.warn) console.warn('[Mode portable] ' + e.message);
+        }
+        return localCall(action, data);
+      }
+    }
+
+    // Charge les paramètres MySQL dans localStorage avant l'affichage (mode normal)
+    async function prechargerParametres() {
+      if (APP_MODE !== 'normal') return;
+      try {
+        const res = await apiCall('get_settings');
+        if (res && res.status === 'success' && res.settings) {
+          Object.keys(res.settings).forEach(function(k) {
+            if (res.settings[k] === '' || res.settings[k] == null) LS.del(k);
+            else LS.set(k, res.settings[k]);
+          });
+        }
+      } catch (e) {}
     }
 
     // © 2026 Professeur Douadi Nabil - INSFP El Hidhab, Sétif.
@@ -128,8 +354,15 @@
     function passHash(p) { return sha256Hex(AUTH_SALT + ':' + p); }
     function identifiantHash(u) { return sha256Hex(AUTH_SALT + ':' + u.trim().toLowerCase()); }
     const ADMIN_USER_HASH = '7a6c15bcdcf959c71d1dd7e4bf64bddb982fb01a32365d831dd7dacac12c20ed';
-    const ADMIN_PASS_HASH = 'cd153356bfcb688cb5c25771ede14f00175851a3f76d25aba29e675286848516';
-    const SETTINGS_PASS_HASH = 'cd153356bfcb688cb5c25771ede14f00175851a3f76d25aba29e675286848516';
+    const ADMIN_PASS_HASH = '0300ef4631a500641e7ec2af25987f053712342796746e2ca4b7899514546f53'; // mot de passe par défaut : admin2026
+    const SETTINGS_PASS_HASH = '0300ef4631a500641e7ec2af25987f053712342796746e2ca4b7899514546f53';
+    const PASS_KEY = 'ps_admin_pass_hash';
+
+    // Mot de passe administrateur en vigueur (modifiable dans Paramètres > Sécurité)
+    function adminPassActuel() {
+      const custom = LS.get(PASS_KEY, '');
+      return custom || ADMIN_PASS_HASH;
+    }
 const SESSION_KEY = 'ps_admin_session';
 const SESSION_TYPE_KEY = 'ps_session_type';
 const STU_KEY = 'ps_stagiaire_tel';
@@ -195,6 +428,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'fiche-b5': 'Matériel et méthode',
         'fiche-b51': 'Matériel nécessaire',
         'fiche-b52': 'Méthode (démarche adoptée)',
+        'fiche-b53': 'Réactifs nécessaires',
         'b-logout': 'Déconnexion',
         'b-dl-zip': 'Télécharger le projet (.zip)',
         'zip-info': 'Le fichier ZIP contient le code complet du projet séparé en 3 fichiers : <strong>HTML</strong> (structure), <strong>CSS</strong> (design) et <strong>JavaScript</strong> (logique), avec la licence d\'utilisation.',
@@ -215,6 +449,11 @@ const STU_KEY = 'ps_stagiaire_tel';
         'arch-empty': 'Aucune archive pour le moment — une copie est créée automatiquement à chaque sauvegarde d\'un projet.',
         'fiche-b6': 'Photos du projet',
         'fiche-b6s': '8 emplacements - modifiables par le professeur et les stagiaires',
+        'fiche-b7': 'Résultat et interprétation',
+        'fiche-b7a': 'Résultats obtenus',
+        'fiche-b7as': 'Ce que le projet a permis d\'obtenir',
+        'fiche-b7b': 'Interprétation',
+        'fiche-b7bs': 'Analyse, comparaison et conclusion',
         'b-photo-ajouter': 'Ajouter',
         'b-ajouter': 'Ajouter',
         'b-modifier': 'Modifier',
@@ -341,6 +580,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'fiche-b5': 'التج equip و الطريقة'.replace('equip', 'التجهيز'),
         'fiche-b51': 'التجهيزات اللازمة',
         'fiche-b52': 'المنهجية (المسار المتبع)',
+        'fiche-b53': 'المواد الكيميائية اللازمة',
         'b-logout': 'تسجيل الخروج',
         'b-dl-zip': 'تحميل المشروع (zip)',
         'zip-info': 'ملف ZIP يحتوي على كود المشروع كاملاً في 3 ملفات: HTML و CSS و JavaScript، مع رخصة الاستعمال.',
@@ -365,6 +605,11 @@ const STU_KEY = 'ps_stagiaire_tel';
         'arch-empty': 'لا يوجد أرشيف حالياً — تُنشأ نسخة تلقائياً عند كل حفظ لمشروع.',
         'fiche-b6': 'صور المشروع',
         'fiche-b6s': '8 أماكن - قابلة للتعديل من طرف الأستاذ والمتربصين',
+        'fiche-b7': 'النتيجة والتفسير',
+        'fiche-b7a': 'النتائج المحصل عليها',
+        'fiche-b7as': 'ما سمح المشروع بتحقيقه',
+        'fiche-b7b': 'التفسير',
+        'fiche-b7bs': 'التحليل والمقارنة والاستنتاج',
         'b-photo-ajouter': 'إضافة',
         'b-ajouter': 'إضافة',
         'b-modifier': 'تعديل',
@@ -487,6 +732,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'fiche-b5': 'Material and method',
         'fiche-b51': 'Required material',
         'fiche-b52': 'Method (adopted approach)',
+        'fiche-b53': 'Required reagents',
         'b-logout': 'Sign out',
         'b-dl-zip': 'Download the project (.zip)',
         'zip-info': 'The ZIP file contains the full project code split into 3 files: <strong>HTML</strong> (structure), <strong>CSS</strong> (design) and <strong>JavaScript</strong> (logic), with the licence.',
@@ -511,6 +757,11 @@ const STU_KEY = 'ps_stagiaire_tel';
         'arch-empty': 'No archive yet — a copy is created automatically each time a project is saved.',
         'fiche-b6': 'Project photos',
         'fiche-b6s': '8 slots - editable by the teacher and the trainees',
+        'fiche-b7': 'Result and interpretation',
+        'fiche-b7a': 'Results obtained',
+        'fiche-b7as': 'What the project achieved',
+        'fiche-b7b': 'Interpretation',
+        'fiche-b7bs': 'Analysis, comparison and conclusion',
         'b-photo-ajouter': 'Add',
         'b-ajouter': 'Add',
         'b-modifier': 'Edit',
@@ -601,7 +852,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'login-user': '<i class="fas fa-user"></i> Nom d\'utilisateur',
         'login-pass': '<i class="fas fa-lock"></i> Mot de passe',
         'login-btn': '<i class="fas fa-sign-in-alt"></i> Se connecter',
-        'login-hint': 'Accès protégé réservé à l\'enseignant (nom d\'utilisateur et mot de passe du professeur).',
+        'login-hint': 'Accès protégé réservé à l\'enseignant.',
         'login-stu-title': '<i class="fas fa-user-graduate"></i> Accès Stagiaire',
         'login-stu-tel': '<i class="fas fa-phone"></i> Numéro de téléphone (identifiant)',
         'login-stu-pass': '<i class="fas fa-key"></i> Mot de passe (4 chiffres)',
@@ -628,7 +879,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'login-user': '<i class="fas fa-user"></i> اسم المستخدم',
         'login-pass': '<i class="fas fa-lock"></i> كلمة المرور',
         'login-btn': '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول',
-        'login-hint': 'ولوج محمي خاص بالأستاذ (اسم المستخدم وكلمة المرور الخاصتان بالأستاذ).',
+        'login-hint': 'ولوج محمي خاص بالأستاذ.',
     'login-stu-title': '<i class="fas fa-user-graduate"></i> ولوج المتربص',
     'login-stu-tel': '<i class="fas fa-phone"></i> رقم الهاتف (المعرف)',
     'login-stu-pass': '<i class="fas fa-key"></i> كلمة المرور (4 أرقام)',
@@ -655,7 +906,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'login-user': '<i class="fas fa-user"></i> Username',
         'login-pass': '<i class="fas fa-lock"></i> Password',
         'login-btn': '<i class="fas fa-sign-in-alt"></i> Sign in',
-        'login-hint': 'Protected access reserved for the teacher (teacher username and password).',
+        'login-hint': 'Protected access reserved for the teacher.',
         'login-copyright': '<i class="fas fa-copyright"></i> 2026 — Professor Douadi Nabil · INSFP ELHidhab'
       }
     };
@@ -723,8 +974,9 @@ const STU_KEY = 'ps_stagiaire_tel';
       adminGateCallback = null;
     }
 
-    function validerAdminGate() {
-      if (passHash(document.getElementById('adminGatePass').value.trim()) === ADMIN_PASS_HASH) {
+    async function validerAdminGate() {
+      const pass = document.getElementById('adminGatePass').value.trim();
+      if (await motDePasseAdminValide(pass)) {
         const cb = adminGateCallback;
         fermerAdminGate();
         showToast('Accès administrateur autorisé', 'fas fa-user-shield');
@@ -734,6 +986,18 @@ const STU_KEY = 'ps_stagiaire_tel';
         document.getElementById('adminGatePass').value = '';
         document.getElementById('adminGatePass').focus();
       }
+    }
+
+    // Vérifie le mot de passe administrateur (base MySQL en mode normal,
+    // empreinte locale en mode portable).
+    async function motDePasseAdminValide(pass) {
+      const h = passHash(pass);
+      if (APP_MODE === 'normal') {
+        const res = await apiCall('login_prof', { userHash: ADMIN_USER_HASH, passHash: h });
+        if (res && res.status === 'success') return true;
+        if (APP_MODE === 'normal') return false;
+      }
+      return h === adminPassActuel();
     }
 
     // ===== Galerie 4 photos modifiables par l'admin =====
@@ -789,8 +1053,9 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function galerieSauver() {
-      try { localStorage.setItem(GALERIE_KEY, JSON.stringify(galerie)); }
-      catch (e) { showToast('Stockage saturé — utilisez des photos plus légères', 'fas fa-exclamation-triangle', true); }
+      if (!kvSet(GALERIE_KEY, JSON.stringify(galerie))) {
+        showToast('Stockage saturé — utilisez des photos plus légères', 'fas fa-exclamation-triangle', true);
+      }
     }
 
     function galerieCharger() {
@@ -830,7 +1095,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         const reader = new FileReader();
         reader.onload = function(ev) {
           const dataUrl = ev.target.result;
-          localStorage.setItem('ps_logo_' + side, dataUrl);
+          kvSet('ps_logo_' + side, dataUrl);
           const img = document.getElementById('logo' + side + 'Img');
           img.src = dataUrl;
           img.style.display = 'block';
@@ -841,28 +1106,28 @@ const STU_KEY = 'ps_stagiaire_tel';
       }
     });
 
+    // Logo par défaut intégré (utilisé tant que l'administrateur n'en choisit pas un autre)
+    function logoDefaut(side) {
+      const d = window.LOGOS_DEFAUT || {};
+      return side === 'Left' ? (d.left || '') : (d.right || '');
+    }
+
+    function appliquerLogo(idImg, src) {
+      const img = document.getElementById(idImg);
+      if (!img || !src) return;
+      img.src = src;
+      img.style.display = 'block';
+    }
+
     function restoreLogos() {
       ['Left', 'Right'].forEach(function(side) {
-        const saved = localStorage.getItem('ps_logo_' + side);
-        if (saved) {
-          const img = document.getElementById('logo' + side + 'Img');
-          img.src = saved;
-          img.style.display = 'block';
-        }
+        appliquerLogo('logo' + side + 'Img', localStorage.getItem('ps_logo_' + side) || logoDefaut(side));
       });
     }
 
     function renderAccueilLogos() {
-      const savedLeft = localStorage.getItem('ps_logo_Left');
-      const savedRight = localStorage.getItem('ps_logo_Right');
-      if (savedLeft) {
-        document.getElementById('accueilLogoLeftImg').src = savedLeft;
-        document.getElementById('accueilLogoLeftImg').style.display = 'block';
-      }
-      if (savedRight) {
-        document.getElementById('accueilLogoRightImg').src = savedRight;
-        document.getElementById('accueilLogoRightImg').style.display = 'block';
-      }
+      appliquerLogo('accueilLogoLeftImg', localStorage.getItem('ps_logo_Left') || logoDefaut('Left'));
+      appliquerLogo('accueilLogoRightImg', localStorage.getItem('ps_logo_Right') || logoDefaut('Right'));
     }
 
     function changeAccueilLogo(side) {
@@ -877,7 +1142,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       const reader = new FileReader();
       const key = 'ps_logo_' + (side === 'left' ? 'Left' : 'Right');
       reader.onload = function(ev) {
-        localStorage.setItem(key, ev.target.result);
+        kvSet(key, ev.target.result);
         const img = document.getElementById('accueilLogo' + (side === 'left' ? 'Left' : 'Right') + 'Img');
         if (img) { img.src = ev.target.result; img.style.display = 'block'; }
         showToast('Logo ' + (side === 'left' ? 'gauche' : 'droit') + ' modifié', 'fas fa-image');
@@ -1245,6 +1510,7 @@ const STU_KEY = 'ps_stagiaire_tel';
 
     async function profPersist() {
       for (const p of profileList) {
+        if (!p.id_db && p.id) p.id_db = p.id;
         await apiCall('save_profile', { profil: p });
       }
       return true;
@@ -1407,6 +1673,12 @@ const STU_KEY = 'ps_stagiaire_tel';
       }
       const data = profReadForm();
       if (!data) return;
+      if (profileList.some(function(p) {
+        return p.phone === data.phone && String(p.id) !== String(profileEditingId);
+      })) {
+        showToast('Ce numéro est déjà utilisé par un autre stagiaire', 'fas fa-exclamation-triangle', true);
+        return;
+      }
 
       // Ajouter l'ID de la base de données
       data.id_db = profileEditingId;
@@ -1505,7 +1777,8 @@ const STU_KEY = 'ps_stagiaire_tel';
     const LISTE_CFG = {
       objectifs: { zone: 'listeObjectifs', inp: 'inpObjectif', cnt: 'cntObjectifs', vide: 'Aucun objectif défini pour ce projet.' },
       etapes: { zone: 'listeEtapes', inp: 'inpEtape', cnt: 'cntEtapes', vide: 'Aucune étape définie pour ce projet.' },
-      materiel: { zone: 'listeMateriel', inp: 'inpMateriel', cnt: 'cntMateriel', vide: 'Aucun matériel renseigné pour ce projet.' }
+      materiel: { zone: 'listeMateriel', inp: 'inpMateriel', cnt: 'cntMateriel', vide: 'Aucun matériel renseigné pour ce projet.' },
+      reactifs: { zone: 'listeReactifs', inp: 'inpReactif', cnt: 'cntReactifs', vide: 'Aucun réactif renseigné pour ce projet.' }
     };
 
     let ficheList = [];
@@ -1625,7 +1898,7 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function ficheVide(id) {
-      return { id: id, nom: '', membres: [], objectifs: [], etapes: [], materiel: [], methode: '' };
+      return { id: id, nom: '', membres: [], objectifs: [], etapes: [], materiel: [], reactifs: [], methode: '', resultat: '', interpretation: '' };
     }
 
     async function ficheLoad() {
@@ -1641,23 +1914,54 @@ const STU_KEY = 'ps_stagiaire_tel';
       return ficheList.find(function(p) { return p.id === ficheId; }) || null;
     }
 
+    // Sauvegarde silencieuse : pas de rechargement ni de notification
+    async function ficheSauvegarderSilencieux() {
+      const p = ficheCourant();
+      if (!p) return false;
+      if (!p.cree) p.cree = new Date().toISOString();
+      p.modif = Date.now();
+
+      const res = await apiCall('save_projet', { projet: p });
+      if (res.status !== 'success') return false;
+      if (res.projet_id) {
+        p.id = res.projet_id.toString();
+        if (String(ficheId) !== p.id) ficheId = p.id;
+      }
+      if (APP_MODE === 'portable') LS.setJson(FICHES_KEY, ficheList);
+      return true;
+    }
+
     async function ficheSauvegarder() {
       const p = ficheCourant();
       if (!p) return;
-
-      const res = await apiCall('save_projet', { projet: p });
-      if (res.status === 'success') {
-        if (res.projet_id) p.id = res.projet_id.toString();
+      const ok = await ficheSauvegarderSilencieux();
+      if (ok) {
+        archiverProjet(p);
         const flash = document.getElementById('ficheFlash');
         if (flash) {
             flash.classList.add('on');
             setTimeout(function() { flash.classList.remove('on'); }, 1200);
         }
-        showToast('Fiche projet sauvegardée dans la base de données', 'fas fa-save');
+        showToast(APP_MODE === 'normal'
+          ? 'Fiche projet sauvegardée dans la base de données'
+          : 'Fiche projet sauvegardée sur cet appareil', 'fas fa-save');
         await ficheLoad();
       } else {
         showToast('Erreur lors de la sauvegarde du projet', 'fas fa-exclamation-triangle', true);
       }
+    }
+
+    // Enregistre toute la liste (migration des dates, import, etc.)
+    async function fichePersisterListe() {
+      if (APP_MODE === 'portable') {
+        LS.setJson(FICHES_KEY, ficheList);
+        return true;
+      }
+      for (const p of ficheList) {
+        const res = await apiCall('save_projet', { projet: p });
+        if (res && res.projet_id) p.id = res.projet_id.toString();
+      }
+      return true;
     }
 
     // ---- 1. Nom du projet ----
@@ -1721,7 +2025,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         }
         if (!p.modif) { p.modif = Date.now() - (n - i) * 1000; change = true; }
       });
-      if (change) { try { localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList)); } catch (e) {} }
+      if (change) fichePersisterListe();
     }
 
     function ficheRendreProjets() {
@@ -2168,13 +2472,8 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = notationProjet();
       if (!p) { if (!silent) showToast('Sélectionnez d\'abord un projet', 'fas fa-exclamation-triangle', true); return; }
       p.notes = notationLire();
-      try {
-        localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList));
-        archiverProjet(p);
-        if (!silent) showToast('Notation enregistrée : ' + (notationCalculer().t20) + ' / 20', 'fas fa-save');
-      } catch (e) {
-        showToast('Sauvegarde impossible (stockage saturé)', 'fas fa-exclamation-triangle', true);
-      }
+      ficheSauvegarderSilencieux();
+      if (!silent) showToast('Notation enregistrée : ' + (notationCalculer().t20) + ' / 20', 'fas fa-save');
     }
 
     // ================= FINALISATION & NOTES FINALES =================
@@ -2207,8 +2506,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       };
       stags.forEach(function(s) { final.notes[s.index] = { n20: t.t20, n100: t.t100, niveau: notationNiveau(t.t20), app: notationAppreciation(t.t20) }; });
       p.final = final;
-      localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList));
-      archiverProjet(p);
+      ficheSauvegarderSilencieux();
       notationRendreFinal();
       ficheRendreProjets();
       showToast('Projet finalisé — notes finales enregistrées', 'fas fa-flag-checkered');
@@ -2219,7 +2517,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       if (!p || !p.final) return;
       if (!confirm('Annuler la finalisation du projet ? Les notes finales seront effacées.')) return;
       delete p.final;
-      localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList));
+      ficheSauvegarderSilencieux();
       notationRendreFinal();
       ficheRendreProjets();
       showToast('Finalisation annulée', 'fas fa-rotate-left');
@@ -2240,8 +2538,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       p.final.notes[index] = f;
       p.final.ts = Date.now();
       p.final.date = new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-      localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList));
-      archiverProjet(p);
+      ficheSauvegarderSilencieux();
       notationRendreFinal();
       showToast('Note finale du stagiaire enregistrée', 'fas fa-save');
     }
@@ -2259,13 +2556,8 @@ const STU_KEY = 'ps_stagiaire_tel';
       const inp = document.getElementById('finalTel' + index);
       if (!p.final.phones) p.final.phones = {};
       p.final.phones[index] = inp ? inp.value.trim() : '';
-      try {
-        localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList));
-        archiverProjet(p);
-        showToast('Téléphone enregistré', 'fas fa-phone');
-      } catch (e) {
-        showToast('Erreur de sauvegarde', 'fas fa-triangle-exclamation', true);
-      }
+      ficheSauvegarderSilencieux();
+      showToast('Téléphone enregistré', 'fas fa-phone');
     }
 
     function notationTelPropre(tel) {
@@ -2319,7 +2611,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         p.final.phones[index] = tel;
         const inp = document.getElementById('finalTel' + index);
         if (inp) inp.value = tel;
-        try { localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList)); } catch (e) {}
+        ficheSauvegarderSilencieux();
       }
       if (canal !== 'telegram' && !notationTelPropre(tel)) {
         showToast('Numéro de téléphone manquant', 'fas fa-triangle-exclamation', true);
@@ -2772,13 +3064,17 @@ const STU_KEY = 'ps_stagiaire_tel';
       w.document.close();
     }
 
-    function projSupprimerId(id) {
+    async function projSupprimerId(id) {
       const p = ficheList.find(function(x) { return x.id === id; });
       if (!p) return;
       if (!confirm('Supprimer la fiche projet « ' + p.nom + ' » et tout son contenu ?')) return;
+      const res = await apiCall('delete_projet', { id: id });
+      if (res.status !== 'success') {
+        showToast('Erreur lors de la suppression', 'fas fa-exclamation-triangle', true);
+        return;
+      }
       ficheList = ficheList.filter(function(x) { return x.id !== id; });
       if (ficheId === id) { ficheId = ficheList.length ? ficheList[0].id : null; ficheSel = null; ficheSelPhoto = null; }
-      try { localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList)); } catch (e) {}
       ficheToutRendre();
       showToast('Fiche projet supprimée', 'fas fa-trash');
     }
@@ -2988,8 +3284,45 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = ficheCourant();
       if (!p) return;
       p.methode = document.getElementById('ficheMethode').value;
-      try { localStorage.setItem(FICHES_KEY, JSON.stringify(ficheList)); } catch (e) {}
+      ficheSauvegarderSilencieux();
       ficheProgression();
+    }
+
+    // ---- Résultat et interprétation (enregistrement automatique différé) ----
+    let ficheResultatTimer = null;
+
+    function ficheResultatAutoSave(cle) {
+      const p = ficheCourant();
+      if (!p) return;
+      const id = cle === 'interpretation' ? 'ficheInterpretation' : 'ficheResultat';
+      const el = document.getElementById(id);
+      if (!el) return;
+      p[cle] = el.value;
+      ficheMajResultat();
+      ficheProgression();
+      clearTimeout(ficheResultatTimer);
+      ficheResultatTimer = setTimeout(function() {
+        ficheSauvegarderSilencieux();
+      }, 700);
+    }
+
+    // Met à jour les compteurs de mots et les versions imprimables
+    function ficheMajResultat() {
+      const paires = [
+        ['ficheResultat', 'cntResultat', 'printResultat'],
+        ['ficheInterpretation', 'cntInterpretation', 'printInterpretation']
+      ];
+      paires.forEach(function(t) {
+        const ta = document.getElementById(t[0]);
+        const cnt = document.getElementById(t[1]);
+        const pr = document.getElementById(t[2]);
+        const val = ta ? ta.value : '';
+        if (cnt) {
+          const mots = val.trim() ? val.trim().split(/\s+/).length : 0;
+          cnt.textContent = val.trim() ? mots + (mots > 1 ? ' mots' : ' mot') : '';
+        }
+        if (pr) pr.textContent = val;
+      });
     }
 
     function ficheProgression() {
@@ -3002,7 +3335,10 @@ const STU_KEY = 'ps_stagiaire_tel';
         parts.push(p.objectifs && p.objectifs.length ? 1 : 0);
         parts.push(p.etapes && p.etapes.length ? 1 : 0);
         parts.push(p.materiel && p.materiel.length ? 1 : 0);
+        parts.push(p.reactifs && p.reactifs.length ? 1 : 0);
         parts.push(p.methode ? 1 : 0);
+        parts.push(p.resultat ? 1 : 0);
+        parts.push(p.interpretation ? 1 : 0);
         pct = Math.round(parts.reduce(function(a, b) { return a + b; }, 0) / parts.length * 100);
       }
       document.getElementById('ficheProgBar').style.width = pct + '%';
@@ -3018,6 +3354,19 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = ficheCourant();
       m.value = p && p.methode ? p.methode : '';
       m.disabled = !p;
+      const rf = document.getElementById('ficheResultat');
+      const ri = document.getElementById('ficheInterpretation');
+      if (rf) {
+        rf.value = p && p.resultat ? p.resultat : '';
+        rf.disabled = !p;
+        rf.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
+      }
+      if (ri) {
+        ri.value = p && p.interpretation ? p.interpretation : '';
+        ri.disabled = !p;
+        ri.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
+      }
+      ficheMajResultat();
       ficheProgression();
       notationRendreSelect();
       notationRendreMembres();
@@ -3079,14 +3428,17 @@ const STU_KEY = 'ps_stagiaire_tel';
     function ficheSections(p) {
       const membres = (p.membres || []).filter(membreRempli);
       return [
-        { t: '1. Nom du projet', v: p.nom || '—' },
+        { t: '1. Nom du projet', v: [p.nom || '—'] },
         { t: '2. Les membres du projet', v: membres.length
             ? membres.map(function(m, i) { return (i + 1) + '. ' + mComplet(m); })
             : ['—'] },
         { t: '3. Objectifs du projet', v: (p.objectifs || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
         { t: '4. Étapes du projet', v: (p.etapes || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
         { t: '5-1. Matériel nécessaire', v: (p.materiel || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
-        { t: '5-2. Méthode', v: p.methode ? [p.methode] : [] }
+        { t: '5-2. Méthode', v: p.methode ? [p.methode] : [] },
+        { t: '5-3. Réactifs nécessaires', v: (p.reactifs || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
+        { t: '6-1. Résultats obtenus', v: p.resultat ? [p.resultat] : [] },
+        { t: '6-2. Interprétation', v: p.interpretation ? [p.interpretation] : [] }
       ];
     }
 
@@ -3109,12 +3461,17 @@ const STU_KEY = 'ps_stagiaire_tel';
           return '<p style="text-align:center;font-weight:bold;margin:0;">' + ficheEch(t) + '</p>';
         }).join('');
         const blocs = ficheSections(p).map(function(s) {
-          return '<h2 style="font-size:13pt;color:#0369a1;margin:12pt 0 4pt;border-bottom:1pt solid #0369a1;">' + ficheEch(s.t) + '</h2>' +
-            (s.v.length
-              ? (s.v.length === 1 && s.t.indexOf('Nom') !== -1
-                  ? '<p style="font-size:14pt;font-weight:bold;">' + ficheEch(s.v[0]) + '</p>'
-                  : '<ol style="font-size:11.5pt;line-height:1.6;">' + s.v.map(function(l) { return '<li>' + ficheEch(l) + '</li>'; }).join('') + '</ol>')
-              : '<p style="font-style:italic;color:#888;">—</p>');
+          let corps;
+          if (!s.v.length) {
+            corps = '<p style="font-style:italic;color:#888;">—</p>';
+          } else if (s.v.length === 1 && s.t.indexOf('Nom') !== -1) {
+            corps = '<p style="font-size:14pt;font-weight:bold;">' + ficheEch(s.v[0]) + '</p>';
+          } else if (s.v.length === 1) {
+            corps = '<p style="font-size:11.5pt;line-height:1.6;white-space:pre-wrap;">' + ficheEch(s.v[0]) + '</p>';
+          } else {
+            corps = '<ol style="font-size:11.5pt;line-height:1.6;">' + s.v.map(function(l) { return '<li>' + ficheEch(l) + '</li>'; }).join('') + '</ol>';
+          }
+          return '<h2 style="font-size:13pt;color:#0369a1;margin:12pt 0 4pt;border-bottom:1pt solid #0369a1;">' + ficheEch(s.t) + '</h2>' + corps;
         }).join('');
         const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
           '<head><meta charset="utf-8"><title>Fiche projet - ' + ficheEch(p.nom || '') + '</title>' +
@@ -3256,7 +3613,11 @@ const STU_KEY = 'ps_stagiaire_tel';
         } else if (s.t.indexOf('Nom') !== -1) {
           puces.push(paragraphe(s.v[0], { gras: true, taille: 26 }));
         } else {
-          s.v.forEach(function(l) { puces.push(paragraphe('• ' + l, { taille: 22 })); });
+          s.v.forEach(function(l) {
+            String(l).split(/\r?\n/).forEach(function(ligne, idx) {
+              puces.push(paragraphe((idx === 0 ? '• ' : '  ') + ligne, { taille: 22 }));
+            });
+          });
         }
       });
       puces.push(paragraphe('', { taille: 16 }));
@@ -3301,8 +3662,9 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function archSauver() {
-      try { localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveList)); }
-      catch (e) { showToast('Archive : stockage saturé', 'fas fa-exclamation-triangle', true); }
+      if (!kvSet(ARCHIVE_KEY, JSON.stringify(archiveList))) {
+        showToast('Archive : stockage saturé', 'fas fa-exclamation-triangle', true);
+      }
     }
 
     function archInstant() {
@@ -3618,10 +3980,10 @@ const STU_KEY = 'ps_stagiaire_tel';
       document.getElementById('settingsLockModal').classList.remove('show');
     }
 
-    function unlockSettings() {
+    async function unlockSettings() {
       const pass = document.getElementById('settingsLockPass').value.trim();
       const errorEl = document.getElementById('settingsLockError');
-      if (passHash(pass) === SETTINGS_PASS_HASH) {
+      if (await motDePasseAdminValide(pass)) {
         const section = document.getElementById('settingsSection');
         section.classList.remove('locked');
         section.querySelectorAll('input').forEach(function(i) { i.disabled = false; });
@@ -3643,6 +4005,66 @@ const STU_KEY = 'ps_stagiaire_tel';
       section.querySelectorAll('.action-buttons button').forEach(function(b) { b.disabled = true; });
       document.getElementById('btnLockSettings').disabled = true;
       showToast('Paramètres verrouillés', 'fas fa-lock');
+    }
+
+    // ===== Modification du mot de passe administrateur =====
+    function viderChampsMotDePasse() {
+      ['passActuel', 'passNouveau', 'passConfirme'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+
+    async function changerMotDePasse() {
+      const actuel = document.getElementById('passActuel').value.trim();
+      const nouveau = document.getElementById('passNouveau').value.trim();
+      const confirme = document.getElementById('passConfirme').value.trim();
+
+      if (!actuel || !nouveau || !confirme) {
+        showToast('Remplissez les trois champs', 'fas fa-exclamation-triangle', true);
+        return;
+      }
+      if (nouveau.length < 6) {
+        showToast('Le nouveau mot de passe doit contenir au moins 6 caractères', 'fas fa-exclamation-triangle', true);
+        document.getElementById('passNouveau').focus();
+        return;
+      }
+      if (nouveau === actuel) {
+        showToast('Le nouveau mot de passe doit être différent de l\'actuel', 'fas fa-exclamation-triangle', true);
+        return;
+      }
+      if (nouveau !== confirme) {
+        showToast('Les deux nouveaux mots de passe ne correspondent pas', 'fas fa-exclamation-triangle', true);
+        document.getElementById('passConfirme').value = '';
+        document.getElementById('passConfirme').focus();
+        return;
+      }
+
+      if (!(await motDePasseAdminValide(actuel))) {
+        showToast('Mot de passe actuel incorrect', 'fas fa-lock', true);
+        document.getElementById('passActuel').value = '';
+        document.getElementById('passActuel').focus();
+        return;
+      }
+
+      const newHash = passHash(nouveau);
+
+      if (APP_MODE === 'normal') {
+        const res = await apiCall('change_password', {
+          userHash: ADMIN_USER_HASH,
+          currentHash: passHash(actuel),
+          newHash: newHash
+        });
+        if (!res || res.status !== 'success') {
+          showToast((res && res.message) || 'Modification impossible', 'fas fa-exclamation-triangle', true);
+          return;
+        }
+      }
+
+      // Mémorise aussi l'empreinte locale (mode portable / secours hors serveur)
+      LS.set(PASS_KEY, newHash);
+      viderChampsMotDePasse();
+      showToast('Mot de passe modifié avec succès', 'fas fa-key');
     }
 
     function openLicence() {
@@ -3705,13 +4127,13 @@ const STU_KEY = 'ps_stagiaire_tel';
         loginSlogan: document.getElementById('setLoginSlogan').value.trim() || DEFAULT_SETTINGS.loginSlogan,
         profName: document.getElementById('setProfName').value.trim() || DEFAULT_SETTINGS.profName
       };
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+      kvSet(SETTINGS_KEY, JSON.stringify(s));
       applySettings(s);
       showToast('Paramètres de l\'interface enregistrés', 'fas fa-save');
     }
 
     function resetSettings() {
-      localStorage.removeItem(SETTINGS_KEY);
+      kvDel(SETTINGS_KEY);
       applySettings(DEFAULT_SETTINGS);
       fillSettingsForm(DEFAULT_SETTINGS);
       showToast('Paramètres réinitialisés par défaut', 'fas fa-undo');
@@ -3745,15 +4167,33 @@ const STU_KEY = 'ps_stagiaire_tel';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Badge discret indiquant le mode de fonctionnement
+    function afficherMode() {
+      if (document.getElementById('modeBadge')) return;
+      const b = document.createElement('div');
+      b.id = 'modeBadge';
+      b.className = 'mode-badge ' + APP_MODE;
+      b.innerHTML = APP_MODE === 'normal'
+        ? '<i class="fas fa-server"></i> Mode serveur (MySQL)'
+        : '<i class="fas fa-usb"></i> Mode portable';
+      b.title = APP_MODE === 'normal'
+        ? 'Données enregistrées dans MySQL via api.php'
+        : 'Données enregistrées dans ce navigateur (localStorage)';
+      document.body.appendChild(b);
+      setTimeout(function() { b.classList.add('visible'); }, 800);
+    }
+
     // ===== Lancement =====
-    window.addEventListener('load', function() {
+    window.addEventListener('load', async function() {
+      await prechargerParametres();
+      afficherMode();
       updateHeaderDateTime();
       restoreLogos();
       renderAccueilLogos();
       galerieCharger();
       restoreSettings();
-      profLoad();
-      ficheLoad();
+      await profLoad();
+      await ficheLoad();
       ficheDates();
       archCharger();
       notationRendreSelect();

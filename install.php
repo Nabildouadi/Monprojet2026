@@ -13,16 +13,26 @@ try {
     $sql = file_get_contents(__DIR__ . '/database.sql');
     $pdo->exec($sql);
 
-    // Insertion d'un compte admin par défaut (si inexistant)
-    // Mot de passe par défaut : admin123 (on peut le hasher selon le système sha256 du JS ou password_hash en PHP)
-    // Le code JS utilise sha256Hex(AUTH_SALT + ':' + p). Pour simplifier, on insère le hash ou un compte standard.
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = 'profdouadi'");
-    $stmt->execute();
-    if ($stmt->fetchColumn() == 0) {
-        // Insertion de l'administrateur par défaut
-        $adminUserHash = hash('sha256', '517670aa3dc9f48c724d53e5a1aea398307735567c60d9de:profdouadi');
-        $adminPassHash = hash('sha256', '517670aa3dc9f48c724d53e5a1aea398307735567c60d9de:admin2026'); // Mot de passe admin par défaut modifiable
+    // Compatibilité avec une base déjà installée
+    try {
+        $col = $pdo->query("SHOW COLUMNS FROM `insfp_projets`.`projets` LIKE 'data_json'")->fetch();
+        if (!$col) {
+            $pdo->exec("ALTER TABLE `insfp_projets`.`projets` ADD COLUMN `data_json` LONGTEXT NULL");
+        }
+    } catch (PDOException $migration) {
+        // Ignorer : la base vient d'être créée avec la colonne.
+    }
 
+    // Insertion d'un compte admin par défaut (si inexistant)
+    // Le frontend utilise sha256Hex(AUTH_SALT + ':' + identifiant) / sha256Hex(AUTH_SALT + ':' + mot de passe) :
+    // on enregistre donc directement ces empreintes, jamais les valeurs en clair.
+    // Identifiant par défaut : profdouadi — Mot de passe par défaut : admin2026
+    $adminUserHash = hash('sha256', '517670aa3dc9f48c724d53e5a1aea398307735567c60d9de:profdouadi');
+    $adminPassHash = hash('sha256', '517670aa3dc9f48c724d53e5a1aea398307735567c60d9de:admin2026');
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
+    $stmt->execute([$adminUserHash]);
+    if ($stmt->fetchColumn() == 0) {
         $insert = $pdo->prepare("INSERT INTO users (username, password, prof_name) VALUES (?, ?, ?)");
         $insert->execute([$adminUserHash, $adminPassHash, 'Douadi Nabil']);
     }
@@ -65,7 +75,7 @@ try {
             <h1>Installation Réussie !</h1>
             <p>La base de données MySQL a été configurée avec succès pour l'application <strong>Les Projets des Stagiaires</strong> (INSFP El Hidhab 2026).</p>
             <p style='font-size:0.85rem; color:#64748b; margin-top:1rem;'>Identifiant professeur par défaut : <code>profdouadi</code> / Mot de passe : <code>admin2026</code></p>
-            <a href='Les Projets des Stagiaires.html'>Accéder à l'application</a>
+            <a href='index.html'>Accéder à l'application</a>
         </div>
     </body>
     </html>";

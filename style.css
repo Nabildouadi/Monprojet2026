@@ -1506,3 +1506,417 @@
       body { background: #fff; }
     }
   
+    /* ===== Badge de mode (serveur MySQL / portable) ===== */
+    .mode-badge {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 9998;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .28);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .35s ease, transform .35s ease;
+      pointer-events: none;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+    .mode-badge.portable {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    .mode-badge.visible {
+      opacity: .96;
+      transform: translateY(0);
+    }
+    .mode-badge i { font-size: 13px; }
+
+    @media (max-width: 600px) {
+      .mode-badge {
+        right: 8px;
+        bottom: 8px;
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+    }
+
+    @media print {
+      .mode-badge { display: none !important; }
+    }
+
+    /* ============================================================
+       FICHE PROJET — DESIGN 2026
+       Cartes, en-têtes de sections, barre de progression,
+       résultats & interprétation. Aucune donnée modifiée.
+       ============================================================ */
+    #page-fiche .gest-section {
+      padding: 1.35rem 1.4rem 1.5rem;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background:
+        radial-gradient(circle at 100% 0, rgba(14,165,233,.10), transparent 42%),
+        radial-gradient(circle at 0 100%, rgba(16,185,129,.09), transparent 42%),
+        var(--card-bg);
+      box-shadow: 0 26px 54px -34px rgba(15,23,42,.55);
+    }
+    #page-fiche > .gest-section > h2 {
+      font-size: 1.22rem;
+      letter-spacing: .2px;
+      margin-bottom: 1rem;
+      padding-bottom: .7rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    #page-fiche > .gest-section > h2 > i { color: var(--primary); }
+
+    /* ---- Barre de progression ---- */
+    #page-fiche .fiche-prog-wrap {
+      padding: .8rem 1.05rem;
+      gap: .85rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0f172a, #1e293b 60%, #0f3460);
+      box-shadow: 0 16px 32px -20px rgba(15,23,42,.9);
+    }
+    #page-fiche .fiche-prog-wrap .fiche-count,
+    #page-fiche .fiche-prog-wrap .fiche-prog-txt { color: #e2e8f0; }
+    #page-fiche .fiche-prog-wrap .fiche-count { font-size: .8rem; font-weight: 700; }
+    #page-fiche .fiche-prog-txt { font-size: .95rem; font-weight: 800; }
+    #page-fiche .fiche-prog {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      overflow: hidden;
+    }
+    #page-fiche .fiche-prog > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      box-shadow: 0 0 18px rgba(56,189,248,.75);
+      transition: width .55s cubic-bezier(.2,.7,.3,1);
+    }
+    #page-fiche .fiche-saved-flash { color: #86efac; }
+
+    /* ---- Barre impression / export ---- */
+    #page-fiche .fiche-export {
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      border-radius: 14px;
+      background: linear-gradient(120deg, #f8fafc, #eff6ff);
+      box-shadow: 0 12px 26px -22px rgba(15,23,42,.6);
+    }
+
+    /* ---- Cartes de sections ---- */
+    #page-fiche .fiche-block {
+      position: relative;
+      padding: 1.05rem 1.15rem 1.15rem;
+      margin-bottom: 1.15rem;
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: 0 16px 34px -28px rgba(15,23,42,.6);
+      transition: box-shadow .3s ease, transform .3s ease, border-color .3s ease;
+      overflow: hidden;
+    }
+    #page-fiche .fiche-block::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: linear-gradient(180deg, var(--primary), #22c55e);
+      opacity: .9;
+    }
+    #page-fiche .fiche-block:hover {
+      border-color: #bfdbfe;
+      box-shadow: 0 24px 46px -30px rgba(15,23,42,.55);
+    }
+    #page-fiche .fiche-subblock {
+      margin: .85rem 0 0;
+      padding: .85rem .95rem .95rem;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+    #page-fiche .fiche-subblock::before { display: none; }
+
+    /* ---- En-tête de section ---- */
+    #page-fiche .fiche-block-head {
+      gap: .5rem;
+      font-size: 1rem;
+      letter-spacing: .1px;
+      padding-bottom: .6rem;
+      margin-bottom: .85rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    #page-fiche .fiche-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      font-size: .8rem;
+      box-shadow: 0 8px 16px -8px rgba(14,165,233,.9);
+    }
+    #page-fiche .fiche-num.sub { box-shadow: 0 8px 16px -8px rgba(16,185,129,.9); }
+    #page-fiche .fiche-ic {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: .82rem;
+      color: #0369a1;
+      background: #e0f2fe;
+    }
+    #page-fiche .fiche-ic.sub { color: #047857; background: #dcfce7; }
+    #page-fiche .fiche-count {
+      font-size: .74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    #page-fiche .fiche-block-tools .btn {
+      padding: .32rem .65rem;
+      font-size: .72rem;
+      border-radius: 9px;
+    }
+
+    /* ---- Barre d'ajout ---- */
+    #page-fiche .fiche-add-row {
+      padding: .55rem;
+      gap: .45rem;
+      margin-bottom: .85rem;
+      border: 1px solid var(--border-color);
+      border-radius: 13px;
+      background: #f1f5f9;
+    }
+    #page-fiche .fiche-add-row input[type=text] {
+      border-radius: 9px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      padding: .55rem .7rem;
+    }
+    #page-fiche .fiche-add-row input[type=text]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(14,165,233,.16);
+    }
+    #page-fiche .fiche-add-row .btn { border-radius: 9px; }
+
+    /* ---- Champs de texte ---- */
+    #page-fiche textarea {
+      width: 100%;
+      min-height: 118px;
+      padding: .8rem .9rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 13px;
+      background: #ffffff;
+      color: var(--text-primary);
+      font-family: var(--font-primary);
+      font-size: .93rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    #page-fiche textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(14,165,233,.14);
+    }
+
+    /* ---- Cartes de projets ---- */
+    #page-fiche .proj-grid { gap: .9rem; }
+    #page-fiche .proj-card {
+      border: 1px solid var(--border-color);
+      border-top: 4px solid var(--primary);
+      border-left: 0;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      box-shadow: 0 12px 26px -24px rgba(15,23,42,.6);
+    }
+    #page-fiche .proj-card:hover {
+      transform: translateY(-4px);
+      border-color: #bae6fd;
+      box-shadow: 0 22px 38px -24px rgba(14,165,233,.6);
+    }
+    #page-fiche .proj-card.active {
+      border-color: var(--primary);
+      border-top-color: #22c55e;
+      background: linear-gradient(180deg, #eff6ff, #f0fdf4);
+      box-shadow: 0 0 0 2px rgba(14,165,233,.35) inset, 0 18px 34px -24px rgba(14,165,233,.7);
+    }
+    #page-fiche .proj-card h4 i { color: var(--primary); }
+    #page-fiche .proj-card .proj-card-date { color: var(--text-muted); font-size: .72rem; }
+    #page-fiche .proj-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      margin-top: .5rem;
+    }
+    #page-fiche .proj-card-meta > span {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      padding: .12rem .5rem;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: #475569;
+      font-size: .68rem;
+      font-weight: 800;
+    }
+
+    /* ---- Membres / listes / photos ---- */
+    #page-fiche .member-slot {
+      border-radius: 0 14px 14px 0;
+      border-left: 4px solid #cbd5e1;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+    #page-fiche .member-slot.filled { border-left-color: var(--secondary); }
+    #page-fiche .fiche-item { background: #ffffff; border-radius: 12px; }
+    #page-fiche .photo-slot {
+      border-radius: 16px;
+      background: linear-gradient(180deg, #f8fafc, #eef2f7);
+    }
+
+    /* ---- Résultat et interprétation ---- */
+    #page-fiche .fiche-block-resultat::before {
+      background: linear-gradient(180deg, #8b5cf6, #0ea5e9);
+    }
+    #page-fiche .fiche-block-resultat .fiche-num {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      box-shadow: 0 8px 16px -8px rgba(139,92,246,.9);
+    }
+    #page-fiche .fiche-ic.resultat { color: #6d28d9; background: #f3e8ff; }
+    #page-fiche .resultat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .9rem;
+    }
+    #page-fiche .resultat-panel {
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+      padding: .8rem .85rem .9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #faf5ff, #ffffff);
+    }
+    #page-fiche .resultat-panel.alt {
+      background: linear-gradient(180deg, #ecfeff, #ffffff);
+    }
+    #page-fiche .resultat-panel-head {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    #page-fiche .resultat-ic {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 11px;
+      font-size: .9rem;
+      color: #6d28d9;
+      background: #ede9fe;
+    }
+    #page-fiche .resultat-ic.alt { color: #0e7490; background: #cffafe; }
+    #page-fiche .resultat-titles { flex: 1; min-width: 0; }
+    #page-fiche .resultat-titles strong {
+      display: block;
+      font-size: .92rem;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+    #page-fiche .resultat-titles small {
+      display: block;
+      font-size: .71rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+    #page-fiche .resultat-compteur {
+      flex-shrink: 0;
+      padding: .16rem .5rem;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: .66rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    #page-fiche .resultat-panel textarea {
+      min-height: 150px;
+      border-radius: 11px;
+      background: #ffffff;
+    }
+    #page-fiche .resultat-panel.alt textarea:focus {
+      border-color: #0891b2;
+      box-shadow: 0 0 0 4px rgba(8,145,178,.14);
+    }
+    /* Élèves : consultation seule */
+    body.role-stu #ficheResultat,
+    body.role-stu #ficheInterpretation {
+      pointer-events: none;
+      background: #f8fafc;
+      color: #334155;
+    }
+    .fiche-print-only { display: none; }
+
+    @media (max-width: 860px) {
+      #page-fiche .resultat-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      #page-fiche .gest-section { padding: 1rem .8rem 1.2rem; }
+      #page-fiche .fiche-block { padding: .85rem .8rem .95rem; }
+      #page-fiche .fiche-block-head { font-size: .92rem; }
+    }
+
+    /* ---- Impression : design propre, sans décor ---- */
+    @media print {
+      #page-fiche .gest-section {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: #ffffff;
+        box-shadow: none;
+      }
+      #page-fiche .fiche-block,
+      #page-fiche .fiche-subblock {
+        margin-bottom: 4mm;
+        padding: 3mm 4mm;
+        border: 1px solid #cbd5e1;
+        border-radius: 0;
+        background: #ffffff;
+        box-shadow: none;
+      }
+      #page-fiche .fiche-block::before,
+      #page-fiche .fiche-ic,
+      #page-fiche .resultat-ic,
+      #page-fiche .resultat-compteur,
+      #page-fiche .fiche-saved-flash { display: none !important; }
+      #page-fiche .resultat-grid { display: block; }
+      #page-fiche .resultat-panel,
+      #page-fiche .resultat-panel.alt {
+        padding: 0;
+        border: 0;
+        background: #ffffff;
+      }
+      #page-fiche .resultat-panel + .resultat-panel { margin-top: 4mm; }
+      #page-fiche .resultat-panel-head { margin-bottom: 1mm; }
+      #page-fiche .resultat-panel textarea { display: none !important; }
+      #page-fiche .fiche-print-only {
+        display: block !important;
+        white-space: pre-wrap;
+        font-size: 11pt;
+        line-height: 1.55;
+        color: #000;
+      }
+      #page-fiche .proj-card-meta { display: none !important; }
+    }

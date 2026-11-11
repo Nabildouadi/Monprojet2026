@@ -1,14 +1,189 @@
-﻿Les Projets des Stagiaires - INSTALLATION
+================================================================
+ LES PROJETS DES STAGIAIRES - INSFP EL HIDHAB - 2026
+ Plateforme pedagogique - Professeur Douadi Nabil
+================================================================
 
-1. Decompressez le dossier ZIP.
-2. Double-cliquez sur "Les Projets des Stagiaires.html" pour ouvrir l'application.
-3. Identifiants professeur (administrateur) : nom d'utilisateur et mot de passe du professeur (aucun code en clair dans les fichiers)
+UN SEUL PROJET, DEUX MODES DE FONCTIONNEMENT
 
-Fichiers :
-- Les Projets des Stagiaires.html : structure de la page
-- style.css : design (couleurs, mise en page)
-- script.js : logique de l'application
-- LICENCE.txt : licence d'utilisation (propriete exclusive)
-- LISEZ-MOI.txt : ce fichier
+  L'application choisit automatiquement son mode :
 
-(c) 2026 Professeur Douadi Nabil - INSFP El Hidhab, Setif.
+  * Sur un PC avec serveur  -> MODE NORMAL : PHP + MySQL
+      Adresse http://... ou http://127.0.0.1:8080/index.html
+      Toutes les donnees (profils, projets, notes, photos,
+      parametres) sont enregistrees dans la base MySQL.
+
+  * Depuis une cle USB ou un simple dossier (adresse file://)
+      -> MODE PORTABLE : enregistrement dans le navigateur
+      (localStorage), aucun serveur, aucune installation.
+
+  Un badge en bas a droite indique le mode actif :
+      bleu   = "Mode serveur (MySQL)"
+      orange = "Mode portable"
+
+  On peut forcer un mode avec l'adresse :
+      index.html?mode=normal
+      index.html?mode=portable
+
+  Si le serveur PHP repond mal ou si MySQL est arrete en mode
+  normal, l'application bascule automatiquement en mode portable
+  pour ne jamais bloquer le travail (le badge change de couleur).
+
+
+================================================================
+ 1) MODE NORMAL : PHP + MYSQL (recommande sur PC)
+================================================================
+
+PREREQUIS
+  - XAMPP (ou WAMP) installe, avec PHP 7.4 ou plus recent
+  - MySQL / MariaDB demarre (bouton Start dans XAMPP)
+
+ETAPE 1 - INSTALLER LA BASE
+  Double-cliquez sur :  Installer-Base.bat
+  Le navigateur s'ouvre sur install.php et affiche
+  "Installation Reussie !".
+  La base "insfp_projets" et toutes les tables sont creees.
+
+  Equivalent manuel :
+      http://localhost/votre-dossier/install.php
+
+ETAPE 2 - LANCER L'APPLICATION
+  Double-cliquez sur :  Lancer-Version-Normale.bat
+  Le navigateur s'ouvre sur :
+      http://127.0.0.1:8080/index.html
+  Laissez la fenetre noire ouverte pendant l'utilisation
+  (c'est le serveur PHP). Fermez-la pour arreter le serveur.
+
+  Avec XAMPP, vous pouvez aussi copier tout le dossier dans
+  C:\xampp\htdocs et ouvrir :
+      http://localhost/NOM-DU-DOSSIER/index.html
+
+IDENTIFIANTS PROFESSEUR (administrateur)
+  Identifiant : profdouadi
+  Mot de passe : admin2026
+  (modifiable dans « Paramètres » > « Sécurité — Modifier le mot de passe »)
+
+REGLAGES DE CONNEXION MYSQL
+  Fichier db.php :
+      hote         : localhost
+      base         : insfp_projets
+      utilisateur  : root
+      mot de passe : (vide par defaut sous XAMPP/WAMP)
+  Modifiez ces valeurs si votre MySQL est protege par un mot de passe.
+
+
+================================================================
+ 2) MODE PORTABLE : CLE USB / SANS INSTALLATION
+================================================================
+
+DEUX FACONS D'UTILISER LE MODE PORTABLE
+
+  a) Version tout-en-un (1 seul fichier, ideal cle USB) :
+       dist\Les Projets des Stagiaires - Portable.html
+
+     Pour la (re)generer apres une modification du code :
+       - double-cliquez sur  build-portable.bat
+         (necessite Node.js installe sur le PC de preparation)
+       - ou lancez  Lancer-Version-Portable.bat  : il genere le
+         fichier s'il n'existe pas, puis l'ouvre.
+
+     Ce fichier contient le CSS, le JavaScript et les polices
+     d'icones : il fonctionne par double-clic, sans Internet,
+     sans PHP et sans MySQL. Copiez-le sur la cle USB.
+
+  b) Le dossier complet ouvert directement :
+       index.html
+     ouvert par double-clic fonctionne aussi en mode portable
+     (adresse file://). Pratique pour tester rapidement.
+
+  IMPORTANT : en mode portable, les donnees sont stockees dans
+  le navigateur de l'ordinateur utilise. Elles ne suivent pas la
+  cle USB d'un PC a un autre. Pour transferer des donnees :
+      - utilisez les boutons "Exporter (JSON)" / "Importer (JSON)"
+        de l'application,
+      - ou utilisez le mode normal MySQL sur un PC fixe.
+
+
+================================================================
+ 3) OU SONT ENREGISTREES LES DONNEES ?
+================================================================
+
+  MODE NORMAL (MySQL) :
+      profils stagiaires ........ table stagiaires
+      specialites ............... table specialites
+      fiches projets ............ table projets (+ data_json)
+      membres, objectifs, etapes, materiel, photos, notes
+                                  tables projet_*
+      theme, logos, galerie, archive, textes
+                                  table settings
+
+  MODE PORTABLE (localStorage du navigateur) :
+      ps_profiles, ps_specialites, ps_fiches_projets,
+      ps_settings, ps_archive_projets, ps_logo_*, ps_galerie...
+
+  Le meme code source (script.js) sert aux deux modes : chaque
+  action passe par une seule fonction (apiCall) qui appelle
+  api.php en mode normal ou le stockage local en mode portable.
+  Il n'y a donc pas deux projets a maintenir.
+
+
+================================================================
+ 4) CONTENU DU DOSSIER
+================================================================
+
+  index.html ................ page de l'application (mode normal)
+  style.css ................. design / mise en page
+  script.js ................. logique de l'application (2 modes)
+  api.php ................... API PHP (MySQL)
+  db.php .................... connexion PDO + migration auto
+  install.php ............... creation de la base et des tables
+  database.sql .............. structure SQL complete
+  assets\ ................... Font Awesome local (icones, hors ligne)
+  dist\ ..................... version portable tout-en-un generee
+  Lancer-Version-Normale.bat  serveur PHP + ouverture navigateur
+  Installer-Base.bat ........ installation MySQL
+  Lancer-Version-Portable.bat ouvre/genere la version portable
+  build-portable.bat ........ regenere le fichier portable
+  build-portable.js ......... script de generation (Node.js)
+  LICENCE.txt ............... licence d'utilisation
+  LISEZ-MOI.txt ............. ce fichier
+
+  La colonne "data_json" de la table projets est ajoutee
+  automatiquement si vous utilisez une base deja installee
+  (au premier chargement de l'application ou via install.php).
+
+
+================================================================
+ 5) DEPANNAGE
+================================================================
+
+  "Erreur de connexion" au demarrage
+      -> MySQL n'est pas demarre (XAMPP : bouton Start MySQL)
+      -> verifiez hote/utilisateur/mot de passe dans db.php
+      -> lancez Installer-Base.bat une premiere fois
+
+  La page s'ouvre mais rien ne s'enregistre dans MySQL
+      -> verifiez le badge en bas a droite : s'il est orange,
+         l'application est en mode portable (serveur absent).
+      -> utilisez Lancer-Version-Normale.bat plutot qu'un
+         double-clic direct sur index.html.
+
+  Le fichier portable n'existe pas / est ancien
+      -> lancez build-portable.bat (Node.js requis)
+
+  Port 8080 deja utilise
+      -> fermez l'ancienne fenetre noire, ou ouvrez index.html
+         via XAMPP (http://localhost/...).
+
+  Mot de passe oublie
+      -> le mot de passe par defaut est admin2026.
+      -> une fois connecte, changez-le dans le menu
+         "Parametres" > "Securite - Modifier le mot de passe".
+         Le nouveau mot de passe est enregistre dans MySQL en
+         mode normal, et dans le navigateur en mode portable.
+
+
+================================================================
+ (c) 2026 Professeur Douadi Nabil - INSFP El Hidhab, Setif.
+ Toute reproduction ou revente non autorisee est interdite.
+ Voir LICENCE.txt.
+================================================================

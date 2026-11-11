@@ -15,6 +15,13 @@ if ($inputJSON) {
 
 switch ($action) {
     // -------------------------------------------------------------
+    // TEST DE DISPONIBILITÉ (utilisé par le frontend)
+    // -------------------------------------------------------------
+    case 'ping':
+        echo json_encode(['status' => 'success', 'mode' => 'normal']);
+        break;
+
+    // -------------------------------------------------------------
     // AUTHENTIFICATION
     // -------------------------------------------------------------
     case 'login_prof':
@@ -30,6 +37,30 @@ switch ($action) {
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Identifiant ou mot de passe incorrect.']);
         }
+        break;
+
+    case 'change_password':
+        $userHash = $inputJSON['userHash'] ?? $_POST['userHash'] ?? '';
+        $currentHash = $inputJSON['currentHash'] ?? $_POST['currentHash'] ?? '';
+        $newHash = $inputJSON['newHash'] ?? $_POST['newHash'] ?? '';
+
+        if ($userHash === '' || $currentHash === '' || $newHash === '') {
+            echo json_encode(['status' => 'error', 'message' => 'Données manquantes.']);
+            break;
+        }
+
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? AND password = ?");
+        $stmt->execute([$userHash, $currentHash]);
+        $userId = $stmt->fetchColumn();
+
+        if (!$userId) {
+            echo json_encode(['status' => 'error', 'message' => 'Mot de passe actuel incorrect.']);
+            break;
+        }
+
+        $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $stmt->execute([$newHash, $userId]);
+        echo json_encode(['status' => 'success']);
         break;
 
     case 'login_stu':
@@ -57,6 +88,7 @@ switch ($action) {
         $formatted = array_map(function($p) {
             return [
                 'id' => (string)$p['id'],
+                'id_db' => (string)$p['id'],
                 'nom' => $p['nom'],
                 'prenom' => $p['prenom'],
                 'phone' => $p['phone'],
@@ -89,14 +121,16 @@ switch ($action) {
             $specId = $stmtSpec->fetchColumn() ?: null;
         }
 
-        if (!empty($data['id_db'])) {
+        $idDb = $data['id_db'] ?? $data['id'] ?? null;
+
+        if (!empty($idDb) && is_numeric($idDb)) {
             // Modification
             $stmt = $pdo->prepare("UPDATE stagiaires SET nom = ?, prenom = ?, phone = ?, password = ?, specialite_id = ?, semestre = ?, photo = ? WHERE id = ?");
-            $stmt->execute([$data['nom'], $data['prenom'], $data['phone'], $data['pass'], $specId, $data['semestre'], $data['photo'], $data['id_db']]);
+            $stmt->execute([$data['nom'], $data['prenom'] ?? '', $data['phone'], $data['pass'] ?? '', $specId, $data['semestre'] ?? 'S1', $data['photo'] ?? '', $idDb]);
         } else {
             // Ajout
             $stmt = $pdo->prepare("INSERT INTO stagiaires (nom, prenom, phone, password, specialite_id, semestre, photo) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$data['nom'], $data['prenom'], $data['phone'], $data['pass'], $specId, $data['semestre'], $data['photo']]);
+            $stmt->execute([$data['nom'], $data['prenom'] ?? '', $data['phone'], $data['pass'] ?? '', $specId, $data['semestre'] ?? 'S1', $data['photo'] ?? '']);
         }
         echo json_encode(['status' => 'success']);
         break;
@@ -113,13 +147,25 @@ switch ($action) {
     // -------------------------------------------------------------
     case 'save_specialites':
         $specialites = $inputJSON['specialites'] ?? [];
-        $pdo->beginTransaction();
-        $pdo->exec("DELETE FROM specialites");
-        $stmt = $pdo->prepare("INSERT INTO specialites (nom) VALUES (?)");
+        $nouvelles = [];
         foreach ($specialites as $s) {
-            if (!empty(trim($s))) {
-                $stmt->execute([trim($s)]);
-            }
+            $s = trim((string)$s);
+            if ($s !== '' && !in_array($s, $nouvelles, true)) $nouvelles[] = $s;
+        }
+
+        $pdo->beginTransaction();
+        // Supprime uniquement celles qui ont disparu (les stagiaires passent à NULL via la clé étrangère)
+        if (count($nouvelles)) {
+            $placeholders = implode(',', array_fill(0, count($nouvelles), '?'));
+            $stmt = $pdo->prepare("DELETE FROM specialites WHERE nom NOT IN ($placeholders)");
+            $stmt->execute($nouvelles);
+        } else {
+            $pdo->exec("DELETE FROM specialites");
+        }
+        // Ajoute les nouvelles spécialités
+        $stmt = $pdo->prepare("INSERT IGNORE INTO specialites (nom) VALUES (?)");
+        foreach ($nouvelles as $s) {
+            $stmt->execute([$s]);
         }
         $pdo->commit();
         echo json_encode(['status' => 'success']);
@@ -182,7 +228,7 @@ switch ($action) {
                 $notes[$n['critere_id']] = (float)$n['note_obtenue'];
             }
 
-            $result[] = [
+            $item = [
                 'id' => (string)$p['id'],
                 'nom' => $p['nom'],
                 'methode' => $p['methode'],
@@ -195,6 +241,24 @@ switch ($action) {
                 'photos' => $photos,
                 'notes' => $notes
             ];
+
+            // Restaure les données complètes enregistrées par le mode unifié
+            if (!empty($p['data_json'])) {
+                $saved = json_decode($p['data_json'], true);
+                if (is_array($saved)) {
+                    $item = array_merge($item, $saved);
+                }
+            }
+            $item['id'] = (string)$p['id'];
+            $item['nom'] = $p['nom'];
+            $item['methode'] = $p['methode'] ?? ($item['methode'] ?? '');
+            if (empty($item['cree'])) $item['cree'] = $p['date_creation'];
+            if (empty($item['modif'])) $item['modif'] = strtotime($p['date_modification']) * 1000;
+            $photosItem = is_array($item['photos'] ?? null) ? array_values($item['photos']) : [];
+            $item['photos'] = array_slice(array_pad($photosItem, 8, ''), 0, 8);
+            if (!isset($item['notes']) || !is_array($item['notes'])) $item['notes'] = [];
+
+            $result[] = $item;
         }
 
         echo json_encode(['status' => 'success', 'projets' => $result]);
@@ -220,6 +284,16 @@ switch ($action) {
             $stmt->execute([$p['nom'], $p['methode'] ?? '']);
             $pId = $pdo->lastInsertId();
         }
+
+        // Conserve TOUTES les données de la fiche (notes finales, critères,
+        // photos, téléphones, etc.) dans une seule colonne JSON.
+        $p['id'] = (string)$pId;
+        if (empty($p['cree'])) $p['cree'] = date('c');
+        $p['modif'] = round(microtime(true) * 1000);
+        $jsonData = json_encode($p, JSON_UNESCAPED_UNICODE);
+        if ($jsonData === false) $jsonData = json_encode($p);
+        $stmtJson = $pdo->prepare("UPDATE projets SET data_json = ? WHERE id = ?");
+        $stmtJson->execute([$jsonData, $pId]);
 
         // Nettoyage des sous-tables
         $pdo->prepare("DELETE FROM projet_objectifs WHERE projet_id = ?")->execute([$pId]);

@@ -19,6 +19,16 @@ $options = [
 
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
+
+     // Migration automatique : colonne JSON pour conserver toute la fiche projet
+     try {
+         $col = $pdo->query("SHOW COLUMNS FROM `projets` LIKE 'data_json'")->fetch();
+         if (!$col) {
+             $pdo->exec("ALTER TABLE `projets` ADD COLUMN `data_json` LONGTEXT NULL");
+         }
+     } catch (PDOException $migration) {
+         // La table n'existe pas encore : l'installation s'en occupe.
+     }
 } catch (\PDOException $e) {
      header('Content-Type: application/json');
      echo json_encode(['error' => 'Erreur de connexion : ' . $e->getMessage()]);
