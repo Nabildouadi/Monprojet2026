@@ -29,6 +29,37 @@ UN SEUL PROJET, DEUX MODES DE FONCTIONNEMENT
   pour ne jamais bloquer le travail (le badge change de couleur).
 
 
+===============================================================
+  NOUVEAUTES DE CETTE VERSION
+===============================================================
+
+FICHE PROJET DYNAMIQUE (9 sections numerotees)
+  1  Nom du projet
+  2  Membres (stagiaires 1 a 5)
+  3  Objectifs
+  4  Etapes (travaux pratiques)
+  5  Materiel et methode
+       5-1  Materiel necessaire
+       5-2  Reactifs necessaires
+  6  Mode operatoire
+  7  Resultat et interpretation
+  8  Photos du projet : 10 emplacements (1 a 10)
+  9  Validation et sauvegarde
+
+  Chaque section dispose des boutons Ajouter / Modifier /
+  Supprimer / Sauvegarder, d'une saisie en ligne, du
+  glisser-deposer pour reordonner, d'un filtre, de suggestions,
+  d'un bouton Annuler apres une suppression et de sections
+  repliables. Une barre de progression, un sommaire cliquable et
+  une validation finale suivent l'avancement de la fiche.
+
+LOGOS 3D ANIMES
+  Les deux logos (en-tete et page d'accueil) passent en relief 3D
+  avec une animation de flottement, un reflet qui balaie l'image
+  et un zoom au survol. L'animation s'arrete a l'impression et si
+  Windows demande de reduire les animations.
+
+
 ================================================================
  1) MODE NORMAL : PHP + MYSQL (recommande sur PC)
 ================================================================
@@ -36,6 +67,15 @@ UN SEUL PROJET, DEUX MODES DE FONCTIONNEMENT
 PREREQUIS
   - XAMPP (ou WAMP) installe, avec PHP 7.4 ou plus recent
   - MySQL / MariaDB demarre (bouton Start dans XAMPP)
+
+LANCEMENT RAPIDE (recommande)
+  Double-cliquez sur :  Lancer-Les-Projets.bat
+  Ce lanceur choisit tout seul le bon mode :
+    - PHP + MySQL detectes  -> MODE NORMAL
+    - sinon                 -> MODE PORTABLE (sans installation)
+  Il detecte PHP dans XAMPP, WAMP, Laragon, le dossier local
+  ou le PATH, choisit un port libre (8080, puis 8081...)
+  et ouvre le navigateur automatiquement.
 
 ETAPE 1 - INSTALLER LA BASE
   Double-cliquez sur :  Installer-Base.bat
@@ -47,9 +87,12 @@ ETAPE 1 - INSTALLER LA BASE
       http://localhost/votre-dossier/install.php
 
 ETAPE 2 - LANCER L'APPLICATION
-  Double-cliquez sur :  Lancer-Version-Normale.bat
+  Double-cliquez sur :  Lancer-Les-Projets.bat
+  (ou directement sur Lancer-Version-Normale.bat)
   Le navigateur s'ouvre sur :
       http://127.0.0.1:8080/index.html
+  Si le port 8080 est deja pris, le lanceur utilise 8081, 8082...
+  L'adresse exacte est affichee dans la fenetre noire.
   Laissez la fenetre noire ouverte pendant l'utilisation
   (c'est le serveur PHP). Fermez-la pour arreter le serveur.
 
@@ -59,7 +102,7 @@ ETAPE 2 - LANCER L'APPLICATION
 
 IDENTIFIANTS PROFESSEUR (administrateur)
   Identifiant : profdouadi
-  Mot de passe : 00000000
+  Mot de passe : admin2026
   (modifiable dans « Paramètres » > « Sécurité — Modifier le mot de passe »)
 
 REGLAGES DE CONNEXION MYSQL
@@ -139,6 +182,7 @@ DEUX FACONS D'UTILISER LE MODE PORTABLE
   database.sql .............. structure SQL complete
   assets\ ................... Font Awesome local (icones, hors ligne)
   dist\ ..................... version portable tout-en-un generee
+  Lancer-Les-Projets.bat .... lancement automatique (normal ou portable)
   Lancer-Version-Normale.bat  serveur PHP + ouverture navigateur
   Installer-Base.bat ........ installation MySQL
   Lancer-Version-Portable.bat ouvre/genere la version portable
@@ -171,8 +215,11 @@ DEUX FACONS D'UTILISER LE MODE PORTABLE
       -> lancez build-portable.bat (Node.js requis)
 
   Port 8080 deja utilise
-      -> fermez l'ancienne fenetre noire, ou ouvrez index.html
-         via XAMPP (http://localhost/...).
+      -> inutile de faire quoi que ce soit : les lanceurs prennent
+         automatiquement le premier port libre (8081, 8082...).
+         L'adresse exacte est affichee dans la fenetre noire.
+      -> si les 20 ports sont occupes, fermez les anciennes
+         fenetres noires puis relancez le fichier .bat.
 
   Mot de passe oublie
       -> le mot de passe par defaut est admin2026.

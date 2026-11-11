@@ -1,31 +1,102 @@
 @echo off
+setlocal EnableExtensions
 title Installation de la base MySQL
 cd /d "%~dp0"
 
-set "PHP="
-if exist "C:\xampp\php\php.exe" set "PHP=C:\xampp\php\php.exe"
-if exist "C:\wamp64\bin\php\php8.2.12\php.exe" set "PHP=C:\wamp64\bin\php\php8.2.12\php.exe"
-if "%PHP%"=="" (
-  where php >nul 2>nul
-  if not errorlevel 1 set "PHP=php"
+call :chercher_php
+if not defined PHP goto :sansphp
+
+rem ---- Recherche d'un port libre (8080 a 8099) ----
+set "PORT=8080"
+:port_libre
+netstat -an 2>nul | findstr /c:":%PORT% " >nul
+if not errorlevel 1 (
+  set /a PORT+=1
+  if %PORT% GTR 8099 goto :sansport
+  goto :port_libre
 )
 
-if "%PHP%"=="" (
-  echo PHP n'a pas ete trouve.
-  echo Demarrez XAMPP/WAMP et ouvrez install.php depuis le navigateur.
+netstat -an 2>nul | findstr /c:":3306 " >nul
+if errorlevel 1 (
+  echo.
+  echo   ATTENTION : MySQL ne semble pas demarre ^(port 3306^).
+  echo   Demarrez XAMPP ou WAMP ^(bouton Start MySQL^), puis relancez.
+  echo.
   pause
-  exit /b 1
 )
 
+cls
 echo ============================================================
 echo   Installation de la base de donnees MySQL
 echo ============================================================
 echo.
-echo MySQL doit etre demarre (XAMPP / WAMP).
-echo La base "insfp_projets" sera creee automatiquement.
+echo   Base a creer : insfp_projets
+echo   Adresse      : http://127.0.0.1:%PORT%/install.php
 echo.
-echo Adresse : http://127.0.0.1:8080/install.php
+echo   Le navigateur s'ouvre. Suivez les indications de la page.
+echo   Laissez cette fenetre ouverte, puis fermez-la a la fin.
 echo.
 
-start "" cmd /c "timeout /t 3 >nul & start "" http://127.0.0.1:8080/install.php"
-"%PHP%" -S 127.0.0.1:8080
+ping -n 3 127.0.0.1 >nul 2>nul
+start "" "http://127.0.0.1:%PORT%/install.php"
+
+"%PHP%" -S 127.0.0.1:%PORT%
+
+echo.
+echo ------------------------------------------------------------
+echo   Serveur arrete. Vous pouvez fermer cette fenetre.
+echo ------------------------------------------------------------
+pause
+exit /b 0
+
+:sansphp
+cls
+echo.
+echo   PHP n'a pas ete trouve sur cet ordinateur.
+echo.
+echo   Demarrez XAMPP / WAMP puis ouvrez dans le navigateur :
+echo       http://localhost/NOM-DU-DOSSIER/install.php
+echo.
+pause
+exit /b 1
+
+:sansport
+cls
+echo.
+echo   Les ports 8080 a 8099 sont tous occupes.
+echo   Fermez les anciennes fenetres noires, puis relancez ce fichier.
+echo.
+pause
+exit /b 1
+
+rem ============================================================
+rem  Recherche de PHP (XAMPP, WAMP, Laragon, dossier local, PATH)
+rem ============================================================
+:chercher_php
+if exist "%~dp0php\php.exe" (
+  set "PHP=%~dp0php\php.exe"
+  goto :eof
+)
+if exist "C:\xampp\php\php.exe" (
+  set "PHP=C:\xampp\php\php.exe"
+  goto :eof
+)
+for /d %%D in ("C:\wamp64\bin\php\php*") do if exist "%%~fD\php.exe" set "PHP=%%~fD\php.exe"
+if defined PHP goto :eof
+for /d %%D in ("C:\wamp\bin\php\php*") do if exist "%%~fD\php.exe" set "PHP=%%~fD\php.exe"
+if defined PHP goto :eof
+for /d %%D in ("C:\laragon\bin\php\php*") do if exist "%%~fD\php.exe" set "PHP=%%~fD\php.exe"
+if defined PHP goto :eof
+for /d %%D in ("C:\tools\php\php*") do if exist "%%~fD\php.exe" set "PHP=%%~fD\php.exe"
+if defined PHP goto :eof
+if exist "C:\php\php.exe" (
+  set "PHP=C:\php\php.exe"
+  goto :eof
+)
+if exist "C:\Program Files\PHP\php.exe" (
+  set "PHP=C:\Program Files\PHP\php.exe"
+  goto :eof
+)
+where php >nul 2>nul
+if not errorlevel 1 for /f "delims=" %%P in ('where php 2^>nul') do set "PHP=%%P"
+goto :eof

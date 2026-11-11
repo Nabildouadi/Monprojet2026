@@ -212,9 +212,9 @@ switch ($action) {
             $stmtPho = $pdo->prepare("SELECT position, image_data FROM projet_photos WHERE projet_id = ? ORDER BY position ASC");
             $stmtPho->execute([$pId]);
             $photosData = $stmtPho->fetchAll();
-            $photos = array_fill(0, 8, '');
+            $photos = array_fill(0, 10, '');
             foreach ($photosData as $ph) {
-                if ($ph['position'] >= 0 && $ph['position'] < 8) {
+                if ($ph['position'] >= 0 && $ph['position'] < 10) {
                     $photos[$ph['position']] = $ph['image_data'];
                 }
             }
@@ -255,7 +255,7 @@ switch ($action) {
             if (empty($item['cree'])) $item['cree'] = $p['date_creation'];
             if (empty($item['modif'])) $item['modif'] = strtotime($p['date_modification']) * 1000;
             $photosItem = is_array($item['photos'] ?? null) ? array_values($item['photos']) : [];
-            $item['photos'] = array_slice(array_pad($photosItem, 8, ''), 0, 8);
+            $item['photos'] = array_slice(array_pad($photosItem, 10, ''), 0, 10);
             if (!isset($item['notes']) || !is_array($item['notes'])) $item['notes'] = [];
 
             $result[] = $item;

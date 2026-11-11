@@ -134,8 +134,8 @@
             out.etapes = Array.isArray(p.etapes) ? p.etapes : [];
             out.materiel = Array.isArray(p.materiel) ? p.materiel : [];
             out.reactifs = Array.isArray(p.reactifs) ? p.reactifs : [];
-            out.photos = Array.isArray(p.photos) ? p.photos.slice(0, 8) : [];
-            while (out.photos.length < 8) out.photos.push('');
+            out.photos = Array.isArray(p.photos) ? p.photos.slice(0, PHOTO_MAX) : [];
+            while (out.photos.length < PHOTO_MAX) out.photos.push('');
             out.notes = p.notes && typeof p.notes === 'object' ? p.notes : {};
             out.methode = p.methode || '';
             out.resultat = p.resultat || '';
@@ -286,8 +286,19 @@
       // Raccourcis: DevTools, code source, enregistrement, copie
       document.addEventListener('keydown', function(e) {
         const k = (e.key || '').toLowerCase();
+        const ctrl = e.ctrlKey || e.metaKey;
+        const t = e.target;
+        const saisie = !!(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable));
+        const pageFiche = document.getElementById('page-fiche');
+        const ficheActive = !!(pageFiche && pageFiche.classList.contains('active'));
+        const ctrlS = ctrl && k === 's';
+        const copie = ctrl && (k === 'c' || k === 'x');
+        // Ctrl+S reste disponible sur la fiche projet (sauvegarde), et
+        // copier/couper restent utilisables dans les champs de saisie.
         const bloque = e.key === 'F12'
-          || ((e.ctrlKey || e.metaKey) && (k === 'u' || k === 's' || k === 'i' || k === 'j' || k === 'c' || k === 'x'));
+          || (ctrl && (k === 'u' || k === 'i' || k === 'j'))
+          || (ctrlS && !ficheActive)
+          || (copie && !saisie);
         if (bloque) {
           e.preventDefault();
           if (window.showToast) showToast('Action désactivée - logiciel protégé', 'fas fa-lock', true);
@@ -427,7 +438,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'fiche-b4': 'Étapes du projet',
         'fiche-b5': 'Matériel et méthode',
         'fiche-b51': 'Matériel nécessaire',
-        'fiche-b52': 'Méthode (démarche adoptée)',
+        'fiche-b52': 'Mode opératoire',
         'fiche-b53': 'Réactifs nécessaires',
         'b-logout': 'Déconnexion',
         'b-dl-zip': 'Télécharger le projet (.zip)',
@@ -448,7 +459,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'th-actions': 'Actions',
         'arch-empty': 'Aucune archive pour le moment — une copie est créée automatiquement à chaque sauvegarde d\'un projet.',
         'fiche-b6': 'Photos du projet',
-        'fiche-b6s': '8 emplacements - modifiables par le professeur et les stagiaires',
+        'fiche-b6s': '10 emplacements (1 à 10) - modifiables par le professeur et les stagiaires',
         'fiche-b7': 'Résultat et interprétation',
         'fiche-b7a': 'Résultats obtenus',
         'fiche-b7as': 'Ce que le projet a permis d\'obtenir',
@@ -519,7 +530,38 @@ const STU_KEY = 'ps_stagiaire_tel';
         'stu-membre': 'Stagiaire',
         'stu-liste': 'Fiches projet de l\'institut',
         'stu-empty': 'Profil introuvable — contactez votre professeur.',
-        'stu-aucun': 'Aucune fiche projet disponible pour le moment.'
+        'stu-aucun': 'Aucune fiche projet disponible pour le moment.',
+        'fiche-nav': 'Sommaire',
+        'fiche-nav1': 'Nom',
+        'fiche-nav2': 'Membres',
+        'fiche-nav3': 'Objectifs',
+        'fiche-nav4': 'Étapes',
+        'fiche-nav5': 'Matériel',
+        'fiche-nav6': 'Mode opératoire',
+        'fiche-nav7': 'Résultat',
+        'fiche-nav8': 'Photos',
+        'fiche-nav9': 'Validation',
+        'fiche-sugg': 'Suggestions',
+        'fiche-undo-btn': 'Annuler',
+        'fiche-b9': 'Validation et sauvegarde',
+        'fiche-b9s': 'Vérifiez que toutes les sections sont remplies, puis validez : l\'ensemble des données de la fiche est enregistré.',
+        'b-valider-fiche': 'Valider et sauvegarder la fiche',
+        'val-nom': 'Nom du projet',
+        'val-membres': 'Membres du projet',
+        'val-objectifs': 'Objectifs',
+        'val-etapes': 'Étapes du projet',
+        'val-materiel': 'Matériel nécessaire',
+        'val-reactifs': 'Réactifs nécessaires',
+        'val-methode': 'Mode opératoire',
+        'val-resultat': 'Résultats obtenus',
+        'val-interpretation': 'Interprétation',
+        'val-ok': 'Rempli',
+        'val-ko': 'À compléter',
+        'val-badge-ok': 'Validée',
+        'val-badge-ko': 'Non validée',
+        'val-badge-mod': 'Modifiée — à revalider',
+        'val-date': 'La validation enregistre toutes les données de la fiche et son état d\'avancement.',
+        'val-date-prefix': 'Dernière validation : '
       },
       ar: {
         'app-lang-label': 'اللغة',
@@ -579,7 +621,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'fiche-b4': 'مراحل المشروع',
         'fiche-b5': 'التج equip و الطريقة'.replace('equip', 'التجهيز'),
         'fiche-b51': 'التجهيزات اللازمة',
-        'fiche-b52': 'المنهجية (المسار المتبع)',
+        'fiche-b52': 'طريقة العمل (البروتوكول)',
         'fiche-b53': 'المواد الكيميائية اللازمة',
         'b-logout': 'تسجيل الخروج',
         'b-dl-zip': 'تحميل المشروع (zip)',
@@ -604,7 +646,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'th-actions': 'إجراءات',
         'arch-empty': 'لا يوجد أرشيف حالياً — تُنشأ نسخة تلقائياً عند كل حفظ لمشروع.',
         'fiche-b6': 'صور المشروع',
-        'fiche-b6s': '8 أماكن - قابلة للتعديل من طرف الأستاذ والمتربصين',
+        'fiche-b6s': '10 أماكن (من 1 إلى 10) - قابلة للتعديل من طرف الأستاذ والمتربصين',
         'fiche-b7': 'النتيجة والتفسير',
         'fiche-b7a': 'النتائج المحصل عليها',
         'fiche-b7as': 'ما سمح المشروع بتحقيقه',
@@ -671,7 +713,38 @@ const STU_KEY = 'ps_stagiaire_tel';
         'stu-membre': 'المتربص',
         'stu-liste': 'بطاقات المشروع الخاصة بالمعهد',
         'stu-empty': 'البطاقة غير موجودة — اتصل بأستاذك.',
-        'stu-aucun': 'لا توجد بطاقة مشروع حالياً.'
+        'stu-aucun': 'لا توجد بطاقة مشروع حالياً.',
+        'fiche-nav': 'فهرس البطاقة',
+        'fiche-nav1': 'الاسم',
+        'fiche-nav2': 'الأعضاء',
+        'fiche-nav3': 'الأهداف',
+        'fiche-nav4': 'المراحل',
+        'fiche-nav5': 'التجهيزات',
+        'fiche-nav6': 'طريقة العمل',
+        'fiche-nav7': 'النتيجة',
+        'fiche-nav8': 'الصور',
+        'fiche-nav9': 'التحقق',
+        'fiche-sugg': 'اقتراحات',
+        'fiche-undo-btn': 'تراجع',
+        'fiche-b9': 'التحقق والحفظ',
+        'fiche-b9s': 'تأكد من ملء جميع الأقسام ثم اضغط على التحقق: تُحفظ كل بيانات البطاقة.',
+        'b-valider-fiche': 'التحقق وحفظ البطاقة',
+        'val-nom': 'اسم المشروع',
+        'val-membres': 'أعضاء المشروع',
+        'val-objectifs': 'الأهداف',
+        'val-etapes': 'مراحل المشروع',
+        'val-materiel': 'التجهيزات اللازمة',
+        'val-reactifs': 'المواد الكيميائية اللازمة',
+        'val-methode': 'طريقة العمل',
+        'val-resultat': 'النتائج المحصل عليها',
+        'val-interpretation': 'التفسير',
+        'val-ok': 'مملوء',
+        'val-ko': 'يجب إكماله',
+        'val-badge-ok': 'محققة',
+        'val-badge-ko': 'غير محققة',
+        'val-badge-mod': 'معدّلة — يجب إعادة التحقق',
+        'val-date': 'التحقق يحفظ كل بيانات البطاقة وحالة تقدمها.',
+        'val-date-prefix': 'آخر تحقق: '
       },
       en: {
         'app-lang-label': 'Language',
@@ -731,7 +804,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'fiche-b4': 'Project steps',
         'fiche-b5': 'Material and method',
         'fiche-b51': 'Required material',
-        'fiche-b52': 'Method (adopted approach)',
+        'fiche-b52': 'Operating procedure',
         'fiche-b53': 'Required reagents',
         'b-logout': 'Sign out',
         'b-dl-zip': 'Download the project (.zip)',
@@ -756,7 +829,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'th-actions': 'Actions',
         'arch-empty': 'No archive yet — a copy is created automatically each time a project is saved.',
         'fiche-b6': 'Project photos',
-        'fiche-b6s': '8 slots - editable by the teacher and the trainees',
+        'fiche-b6s': '10 slots (1 to 10) - editable by the teacher and the trainees',
         'fiche-b7': 'Result and interpretation',
         'fiche-b7a': 'Results obtained',
         'fiche-b7as': 'What the project achieved',
@@ -823,7 +896,38 @@ const STU_KEY = 'ps_stagiaire_tel';
         'stu-membre': 'Trainee',
         'stu-liste': 'Institute project sheets',
         'stu-empty': 'Profile not found — contact your teacher.',
-        'stu-aucun': 'No project sheet available at the moment.'
+        'stu-aucun': 'No project sheet available at the moment.',
+        'fiche-nav': 'Contents',
+        'fiche-nav1': 'Name',
+        'fiche-nav2': 'Members',
+        'fiche-nav3': 'Objectives',
+        'fiche-nav4': 'Steps',
+        'fiche-nav5': 'Material',
+        'fiche-nav6': 'Procedure',
+        'fiche-nav7': 'Result',
+        'fiche-nav8': 'Photos',
+        'fiche-nav9': 'Validation',
+        'fiche-sugg': 'Suggestions',
+        'fiche-undo-btn': 'Undo',
+        'fiche-b9': 'Validation and saving',
+        'fiche-b9s': 'Check that every section is filled, then validate: all the sheet data is saved.',
+        'b-valider-fiche': 'Validate and save the sheet',
+        'val-nom': 'Project name',
+        'val-membres': 'Project members',
+        'val-objectifs': 'Objectives',
+        'val-etapes': 'Project steps',
+        'val-materiel': 'Required material',
+        'val-reactifs': 'Required reagents',
+        'val-methode': 'Operating procedure',
+        'val-resultat': 'Results obtained',
+        'val-interpretation': 'Interpretation',
+        'val-ok': 'Filled',
+        'val-ko': 'To complete',
+        'val-badge-ok': 'Validated',
+        'val-badge-ko': 'Not validated',
+        'val-badge-mod': 'Modified — revalidation needed',
+        'val-date': 'Validation saves all the sheet data and its progress state.',
+        'val-date-prefix': 'Last validation: '
       }
     };
 
@@ -1773,7 +1877,7 @@ const STU_KEY = 'ps_stagiaire_tel';
     // ===== Fiche Projet =====
     const FICHES_KEY = 'ps_fiches_projets';
     const MEMBRE_MAX = 5;
-    const PHOTO_MAX = 8;
+    const PHOTO_MAX = 10;
     const LISTE_CFG = {
       objectifs: { zone: 'listeObjectifs', inp: 'inpObjectif', cnt: 'cntObjectifs', vide: 'Aucun objectif défini pour ce projet.' },
       etapes: { zone: 'listeEtapes', inp: 'inpEtape', cnt: 'cntEtapes', vide: 'Aucune étape définie pour ce projet.' },
@@ -1819,15 +1923,45 @@ const STU_KEY = 'ps_stagiaire_tel';
 
       if (type === 'methode') {
         const ta = document.getElementById('ficheMethode');
-        if (action === 'ajouter') { ta.focus(); showToast('Saisissez la démarche méthodologique', 'fas fa-pen'); return; }
-        if (action === 'modifier') { ta.focus(); showToast('Zone méthode prête à être modifiée', 'fas fa-pen'); return; }
+        if (action === 'ajouter') { ta.focus(); showToast('Saisissez le mode opératoire du projet', 'fas fa-pen'); return; }
+        if (action === 'modifier') { ta.focus(); ta.select(); showToast('Zone mode opératoire prête à être modifiée', 'fas fa-pen'); return; }
         if (action === 'supprimer') {
-          if (!p.methode) { showToast('La méthode est déjà vide', 'fas fa-exclamation-triangle', true); return; }
-          if (!confirm('Effacer la méthode de ce projet ?')) return;
+          if (!p.methode) { showToast('Le mode opératoire est déjà vide', 'fas fa-exclamation-triangle', true); return; }
+          if (!confirm('Effacer le mode opératoire de ce projet ?')) return;
           p.methode = '';
           ta.value = '';
-          ficheSauvegarder();
-          showToast('Méthode effacée', 'fas fa-trash');
+          const pm = document.getElementById('printMethode');
+          if (pm) pm.textContent = '';
+          ficheSauvegarderSilencieux();
+          ficheProgression();
+          ficheRendreValidation();
+          showToast('Mode opératoire effacé', 'fas fa-trash');
+        }
+        return;
+      }
+
+      if (type === 'resultat' || type === 'interpretation') {
+        const id = type === 'resultat' ? 'ficheResultat' : 'ficheInterpretation';
+        const ta = document.getElementById(id);
+        const libelle = type === 'resultat' ? 'les résultats obtenus' : 'l\'interprétation';
+        if (action === 'ajouter' || action === 'modifier') {
+          if (!ta) return;
+          ta.focus();
+          if (action === 'modifier') ta.select();
+          showToast('Saisissez ' + libelle, 'fas fa-pen');
+          return;
+        }
+        if (action === 'supprimer') {
+          if (!p[type]) { showToast('Cette zone est déjà vide', 'fas fa-exclamation-triangle', true); return; }
+          if (!confirm('Effacer ' + libelle + ' de ce projet ?')) return;
+          p[type] = '';
+          if (ta) ta.value = '';
+          ficheMajResultat();
+          ficheSauvegarderSilencieux();
+          ficheProgression();
+          ficheRendreValidation();
+          showToast('Contenu effacé', 'fas fa-trash');
+          return;
         }
         return;
       }
@@ -1898,7 +2032,24 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     function ficheVide(id) {
-      return { id: id, nom: '', membres: [], objectifs: [], etapes: [], materiel: [], reactifs: [], methode: '', resultat: '', interpretation: '' };
+      return { id: id, nom: '', membres: [], objectifs: [], etapes: [], materiel: [], reactifs: [], methode: '', resultat: '', interpretation: '', valide: false, valideLe: null, valideEmpreinte: '' };
+    }
+
+    // Garantit un identifiant unique pour chaque élément des listes
+    // (données anciennes, imports, projets créés avant cette version).
+    function ficheAssurerIds() {
+      ['objectifs', 'etapes', 'materiel', 'reactifs'].forEach(function(cle) {
+        (ficheList || []).forEach(function(p) {
+          if (!p || !Array.isArray(p[cle])) return;
+          p[cle] = p[cle].map(function(it, i) {
+            if (!it || typeof it !== 'object') return { id: 'it_' + i + '_' + Math.random().toString(36).slice(2, 8), texte: String(it || '') };
+            if (it.id === undefined || it.id === null || it.id === '') {
+              it.id = Date.now().toString(36) + '_' + i + '_' + Math.random().toString(36).slice(2, 6);
+            }
+            return it;
+          });
+        });
+      });
     }
 
     async function ficheLoad() {
@@ -1906,6 +2057,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       if (res.status === 'success') {
         ficheList = res.projets || [];
       }
+      ficheAssurerIds();
       if (ficheId === null && ficheList.length) ficheId = ficheList[0].id;
       ficheToutRendre();
     }
@@ -2964,7 +3116,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       let lang = 'fr';
       try { lang = localStorage.getItem(LANG_KEY) || 'fr'; } catch (e) {}
       const dict = langDico(lang);
-      document.querySelectorAll('#photosGrid [data-lang-key]').forEach(function(el) {
+      document.querySelectorAll('#page-fiche [data-lang-key]').forEach(function(el) {
         const k = el.getAttribute('data-lang-key');
         if (k && dict[k] !== undefined) el.innerHTML = dict[k];
       });
@@ -3080,6 +3232,8 @@ const STU_KEY = 'ps_stagiaire_tel';
     }
 
     // ---- 2. Membres du projet (1 à 5) ----
+    let ficheMembreTimer = null;
+
     function ficheRendreMembres() {
       const grid = document.getElementById('memberGrid');
       grid.innerHTML = '';
@@ -3105,6 +3259,27 @@ const STU_KEY = 'ps_stagiaire_tel';
       }
       if (typeof ficheAppliquerLang === 'function') ficheAppliquerLang();
       grid.querySelectorAll('input[data-membre]').forEach(function(inp) {
+        inp.addEventListener('click', function(e) { e.stopPropagation(); });
+        inp.addEventListener('input', function() {
+          const i = parseInt(inp.dataset.membre, 10);
+          const pr = ficheCourant();
+          if (!pr) return;
+          membreAssurer(pr);
+          const v = inp.value.trim().replace(/\s+/g, ' ');
+          pr.membres[i] = v ? { nom: v, prenom: '' } : null;
+          const slot = inp.closest('.member-slot');
+          if (slot) {
+            slot.classList.toggle('filled', !!v);
+            const ic = slot.querySelector('.member-slot-head i');
+            if (ic) {
+              ic.className = v ? 'fas fa-circle-check' : 'fas fa-circle';
+              ic.style.color = v ? '#059669' : '#94a3b8';
+            }
+          }
+          ficheProgression();
+          clearTimeout(ficheMembreTimer);
+          ficheMembreTimer = setTimeout(function() { ficheSauvegarderSilencieux(); }, 800);
+        });
         inp.addEventListener('keydown', function(e) {
           if (e.key !== 'Enter') return;
           e.preventDefault();
@@ -3175,6 +3350,13 @@ const STU_KEY = 'ps_stagiaire_tel';
       if (!p) { showToast('Créez ou sélectionnez d\'abord un projet', 'fas fa-exclamation-triangle', true); return; }
       membreAssurer(p);
       if (membreRempli(p.membres[i])) {
+        const d = membreLire(i);
+        if (d.nom && mComplet(p.membres[i]) === d.nom) {
+          showToast('Stagiaire ' + (i + 1) + ' enregistré automatiquement', 'fas fa-circle-check');
+          const suiv = membreLibre(p);
+          if (suiv >= 0) { ficheSel = { type: 'membres', cle: suiv }; membreFocus(suiv); }
+          return;
+        }
         showToast('Le stagiaire ' + (i + 1) + ' est déjà enregistré — utilisez Modifier', 'fas fa-exclamation-triangle', true);
         return;
       }
@@ -3211,32 +3393,193 @@ const STU_KEY = 'ps_stagiaire_tel';
       showToast('Fiches stagiaires vidées', 'fas fa-eraser');
     }
 
-    // ---- 3-4-5-1 : listes dynamiques (objectifs, étapes, matériel) ----
+    // ---- 3-4-5 : listes dynamiques (objectifs, étapes, matériel, réactifs) ----
+    let ficheEdition = null; // { cle, id } : élément en cours d'édition en ligne
+    let ficheFiltres = {};   // cle -> texte du filtre
+    let ficheDrag = null;    // { cle, id } : élément en cours de glissement
+    let ficheUndo = null;    // { cle, item, index } : dernière suppression
+    let ficheUndoTimer = null;
+
+    // Suggestions rapides (clic = ajout immédiat)
+    const SUGGESTIONS = {
+      objectifs: ['Réaliser un montage', 'Analyser un échantillon', 'Comparer deux méthodes', 'Respecter les règles de sécurité', 'Présenter les résultats'],
+      etapes: ['Préparation du matériel', 'Préparation des solutions', 'Réalisation du montage', 'Mesures et observations', 'Rangement du poste'],
+      materiel: ['Bécher', 'Erlenmeyer', 'Éprouvette graduée', 'Pipette', 'Burette', 'Tube à essais', 'Balance', 'Thermomètre', 'Microscope', 'Lame et lamelle', 'Entonnoir', 'Papier pH', 'Spatule', 'Agitateur'],
+      reactifs: ['Eau distillée', 'Acide chlorhydrique (HCl)', 'Hydroxyde de sodium (NaOH)', 'Sulfate de cuivre (CuSO4)', 'Chlorure de sodium (NaCl)', 'Solution de Fehling', 'Réactif de Biuret', 'Iode', 'Amidon', 'Alcool éthanol', 'Acide sulfurique (H2SO4)', 'Eau de Javel']
+    };
+
     function ficheRendreListe(cle) {
       const cfg = LISTE_CFG[cle];
       const zone = document.getElementById(cfg.zone);
+      if (!zone) return;
       const p = ficheCourant();
       const items = (p && p[cle]) || [];
       zone.innerHTML = '';
-      document.getElementById(cfg.cnt).textContent = items.length ? items.length + ' élément(s)' : '';
+      document.getElementById(cfg.cnt).textContent = items.length
+        ? items.length + (items.length > 1 ? ' éléments' : ' élément')
+        : '';
       if (!items.length) {
         zone.innerHTML = '<p class="fiche-empty">' + cfg.vide + '</p>';
+        ficheRendreChips(cle);
         return;
       }
+      if (items.length >= 4) zone.appendChild(ficheFiltreEl(cle));
+      const frag = document.createDocumentFragment();
       items.forEach(function(it, idx) {
-        const row = document.createElement('div');
-        row.className = 'fiche-item' + (ficheSel && ficheSel.type === cle && ficheSel.cle === it.id ? ' selected' : '');
-        row.style.animationDelay = (idx * 45) + 'ms';
+        frag.appendChild(ficheLigneListe(cle, it, idx));
+      });
+      zone.appendChild(frag);
+      if (ficheFiltres[cle]) ficheFiltrerListe(cle, ficheFiltres[cle]);
+      const inp = document.getElementById('ficheInlineInput');
+      if (inp) {
+        inp.focus();
+        inp.select();
+        inp.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); ficheListEditValider(); }
+          if (e.key === 'Escape') { e.preventDefault(); ficheListEditAnnuler(); }
+        });
+      }
+      ficheRendreChips(cle);
+    }
+
+    // Champ de filtre affiché automatiquement quand la liste est longue
+    function ficheFiltreEl(cle) {
+      const wrap = document.createElement('div');
+      wrap.className = 'fiche-filter-wrap';
+      wrap.innerHTML = '<i class="fas fa-magnifying-glass"></i>' +
+        '<input type="text" class="fiche-filter" placeholder="Filtrer…" value="' + ficheEch(ficheFiltres[cle] || '') + '"' +
+        ' oninput="ficheFiltrerListe(\'' + cle + '\', this.value)">';
+      return wrap;
+    }
+
+    function ficheFiltrerListe(cle, valeur) {
+      ficheFiltres[cle] = valeur;
+      const zone = document.getElementById(LISTE_CFG[cle].zone);
+      if (!zone) return;
+      const q = String(valeur || '').trim().toLowerCase();
+      let visibles = 0;
+      zone.querySelectorAll('.fiche-item').forEach(function(row) {
+        const txt = (row.getAttribute('data-texte') || '').toLowerCase();
+        const ok = !q || txt.indexOf(q) !== -1;
+        row.style.display = ok ? '' : 'none';
+        if (ok) visibles++;
+      });
+      let vide = zone.querySelector('.fiche-filter-vide');
+      if (q && !visibles) {
+        if (!vide) {
+          vide = document.createElement('p');
+          vide.className = 'fiche-empty fiche-filter-vide';
+          zone.appendChild(vide);
+        }
+        vide.textContent = 'Aucun élément ne correspond à « ' + valeur + ' »';
+      } else if (vide) {
+        vide.remove();
+      }
+    }
+
+    // Ligne d'une liste : affichage, édition en ligne, glisser-déposer, monter/descendre
+    function ficheLigneListe(cle, it, idx) {
+      const enEdition = !!(ficheEdition && ficheEdition.cle === cle && ficheEdition.id === it.id);
+      const row = document.createElement('div');
+      row.className = 'fiche-item' + (enEdition ? ' editing' : '') +
+        (ficheSel && ficheSel.type === cle && ficheSel.cle === it.id ? ' selected' : '');
+      row.style.animationDelay = Math.min(idx * 40, 320) + 'ms';
+      row.setAttribute('data-id', it.id);
+      row.setAttribute('data-texte', it.texte || '');
+      row.draggable = !enEdition;
+      row.title = enEdition ? '' : 'Glisser pour réordonner';
+
+      const poignee = '<span class="fiche-drag" title="Glisser pour réordonner"><i class="fas fa-grip-vertical"></i></span>';
+      const num = '<span class="fiche-item-num">' + (idx + 1) + '</span>';
+
+      if (enEdition) {
+        row.innerHTML = poignee + num +
+          '<input type="text" class="fiche-inline-input" id="ficheInlineInput" value="' + ficheEch(it.texte) + '">' +
+          '<div class="member-actions">' +
+            '<button type="button" class="btn btn-success" title="Valider" onclick="event.stopPropagation(); ficheListEditValider()"><i class="fas fa-check"></i></button>' +
+            '<button type="button" class="btn btn-secondary" title="Annuler" onclick="event.stopPropagation(); ficheListEditAnnuler()"><i class="fas fa-xmark"></i></button>' +
+          '</div>';
+      } else {
         row.setAttribute('onclick', 'ficheSelectionner(\'' + cle + '\',\'' + it.id + '\')');
-        row.innerHTML =
-          '<span class="fiche-item-num">' + (idx + 1) + '</span>' +
+        row.innerHTML = poignee + num +
           '<span class="fiche-item-txt">' + ficheEch(it.texte) + '</span>' +
           '<div class="member-actions">' +
-            '<button class="btn btn-accent" onclick="ficheListEdit(\'' + cle + '\',\'' + it.id + '\')"><i class="fas fa-pen"></i> Modifier</button>' +
-            '<button class="btn btn-danger" onclick="ficheListDel(\'' + cle + '\',\'' + it.id + '\')"><i class="fas fa-trash"></i> Supprimer</button>' +
+            '<button type="button" class="fiche-ico-btn" title="Monter" onclick="event.stopPropagation(); ficheListMove(\'' + cle + '\',\'' + it.id + '\',-1)"><i class="fas fa-arrow-up"></i></button>' +
+            '<button type="button" class="fiche-ico-btn" title="Descendre" onclick="event.stopPropagation(); ficheListMove(\'' + cle + '\',\'' + it.id + '\',1)"><i class="fas fa-arrow-down"></i></button>' +
+            '<button type="button" class="btn btn-accent" onclick="event.stopPropagation(); ficheListEdit(\'' + cle + '\',\'' + it.id + '\')"><i class="fas fa-pen"></i> Modifier</button>' +
+            '<button type="button" class="btn btn-danger" onclick="event.stopPropagation(); ficheListDel(\'' + cle + '\',\'' + it.id + '\')"><i class="fas fa-trash"></i> Supprimer</button>' +
           '</div>';
-        zone.appendChild(row);
+      }
+
+      row.addEventListener('dragstart', function(e) {
+        ficheDrag = { cle: cle, id: it.id };
+        row.classList.add('dragging');
+        try {
+          e.dataTransfer.setData('text/plain', it.id);
+          e.dataTransfer.effectAllowed = 'move';
+        } catch (err) {}
       });
+      row.addEventListener('dragend', function() {
+        row.classList.remove('dragging');
+        document.querySelectorAll('#page-fiche .fiche-item.drop-before, #page-fiche .fiche-item.drop-after')
+          .forEach(function(x) { x.classList.remove('drop-before', 'drop-after'); });
+        ficheDrag = null;
+      });
+      row.addEventListener('dragover', function(e) {
+        if (!ficheDrag || ficheDrag.cle !== cle || ficheDrag.id === it.id) return;
+        e.preventDefault();
+        const r = row.getBoundingClientRect();
+        const apres = (e.clientY - r.top) > r.height / 2;
+        row.classList.toggle('drop-after', apres);
+        row.classList.toggle('drop-before', !apres);
+      });
+      row.addEventListener('dragleave', function() {
+        row.classList.remove('drop-before', 'drop-after');
+      });
+      row.addEventListener('drop', function(e) {
+        if (!ficheDrag || ficheDrag.cle !== cle || ficheDrag.id === it.id) return;
+        e.preventDefault();
+        const apres = row.classList.contains('drop-after');
+        const source = ficheDrag.id;
+        row.classList.remove('drop-before', 'drop-after');
+        ficheListDrop(cle, source, it.id, apres);
+      });
+      return row;
+    }
+
+    function ficheListDrop(cle, idSource, idCible, apres) {
+      const p = ficheCourant();
+      if (!p) return;
+      const arr = p[cle] || [];
+      const from = arr.findIndex(function(x) { return x.id === idSource; });
+      if (from < 0) return;
+      const item = arr.splice(from, 1)[0];
+      const to = arr.findIndex(function(x) { return x.id === idCible; });
+      if (to < 0) arr.push(item);
+      else arr.splice(apres ? to + 1 : to, 0, item);
+      ficheSauvegarderSilencieux();
+      ficheRendreListe(cle);
+      ficheProgression();
+      showToast('Ordre mis à jour', 'fas fa-up-down');
+    }
+
+    function ficheListMove(cle, id, sens) {
+      const p = ficheCourant();
+      if (!p) return;
+      const arr = p[cle] || [];
+      const i = arr.findIndex(function(x) { return x.id === id; });
+      const j = i + sens;
+      if (i < 0 || j < 0 || j >= arr.length) return;
+      const tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+      ficheSauvegarderSilencieux();
+      ficheRendreListe(cle);
+      const row = document.querySelector('#' + LISTE_CFG[cle].zone + ' .fiche-item[data-id="' + id + '"]');
+      if (row) {
+        row.classList.add('flash');
+        setTimeout(function() { row.classList.remove('flash'); }, 600);
+      }
     }
 
     function ficheListAdd(cle) {
@@ -3244,48 +3587,279 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = ficheCourant();
       if (!p) { showToast('Créez ou sélectionnez d\'abord un projet', 'fas fa-exclamation-triangle', true); return; }
       const inp = document.getElementById(cfg.inp);
-      const texte = inp.value.trim();
-      if (!texte) { showToast('Le champ est vide', 'fas fa-exclamation-triangle', true); return; }
+      const texte = inp.value.trim().replace(/\s+/g, ' ');
+      if (!texte) { showToast('Le champ est vide', 'fas fa-exclamation-triangle', true); inp.focus(); return; }
       if (!p[cle]) p[cle] = [];
       p[cle].push({ id: Date.now() + '' + Math.floor(Math.random() * 1000), texte: texte });
       inp.value = '';
-      ficheSauvegarder();
+      inp.focus();
+      ficheFiltres[cle] = '';
+      ficheSauvegarderSilencieux();
+      ficheRendreListe(cle);
+      ficheProgression();
+      const zone = document.getElementById(cfg.zone);
+      const derniere = zone ? zone.querySelector('.fiche-item:last-of-type') : null;
+      if (derniere) {
+        derniere.classList.add('nouveau');
+        setTimeout(function() { derniere.classList.remove('nouveau'); }, 900);
+      }
+      showToast('« ' + texte + ' » ajouté', 'fas fa-plus');
+    }
+
+    function ficheListEdit(cle, id) {
+      const p = ficheCourant();
+      if (!p) return;
+      const it = (p[cle] || []).find(function(x) { return x.id === id; });
+      if (!it) return;
+      ficheEdition = { cle: cle, id: id };
+      ficheRendreListe(cle);
+    }
+
+    function ficheListEditValider() {
+      if (!ficheEdition) return;
+      const p = ficheCourant();
+      const cle = ficheEdition.cle;
+      const id = ficheEdition.id;
+      const inp = document.getElementById('ficheInlineInput');
+      const valeur = inp ? inp.value.trim().replace(/\s+/g, ' ') : '';
+      ficheEdition = null;
+      if (p && valeur) {
+        const it = (p[cle] || []).find(function(x) { return x.id === id; });
+        if (it) it.texte = valeur;
+        ficheSauvegarderSilencieux();
+        showToast('Élément modifié', 'fas fa-pen');
+      }
       ficheRendreListe(cle);
       ficheProgression();
     }
 
-    function ficheListEdit(cle, id) {
-      const cfg = LISTE_CFG[cle];
-      const p = ficheCourant();
-      if (!p) return;
-      const it = p[cle].find(function(x) { return x.id === id; });
-      if (!it) return;
-      const nouveau = window.prompt('Modifier l\'élément :', it.texte);
-      if (nouveau === null) return;
-      if (!nouveau.trim()) { showToast('Le champ ne peut pas être vide', 'fas fa-exclamation-triangle', true); return; }
-      it.texte = nouveau.trim();
-      ficheSauvegarder();
+    function ficheListEditAnnuler() {
+      if (!ficheEdition) return;
+      const cle = ficheEdition.cle;
+      ficheEdition = null;
       ficheRendreListe(cle);
-      showToast('Élément modifié', 'fas fa-pen');
     }
 
     function ficheListDel(cle, id) {
       const p = ficheCourant();
       if (!p) return;
-      p[cle] = p[cle].filter(function(x) { return x.id !== id; });
-      ficheSauvegarder();
+      const arr = p[cle] || [];
+      const idx = arr.findIndex(function(x) { return x.id === id; });
+      if (idx < 0) return;
+      const item = arr.splice(idx, 1)[0];
+      ficheUndo = { cle: cle, item: item, index: idx };
+      ficheSauvegarderSilencieux();
       ficheRendreListe(cle);
       ficheProgression();
-      showToast('Élément supprimé', 'fas fa-trash');
+      ficheAfficherUndo('« ' + item.texte + ' » supprimé');
+    }
+
+    // ---- Annulation de la dernière suppression ----
+    function ficheAfficherUndo(texte) {
+      const barre = document.getElementById('ficheUndo');
+      const txt = document.getElementById('ficheUndoTxt');
+      if (!barre) return;
+      if (txt) txt.textContent = texte;
+      barre.classList.add('on');
+      clearTimeout(ficheUndoTimer);
+      ficheUndoTimer = setTimeout(ficheFermerUndo, 8000);
+    }
+
+    function ficheFermerUndo() {
+      const barre = document.getElementById('ficheUndo');
+      if (barre) barre.classList.remove('on');
+      clearTimeout(ficheUndoTimer);
+      ficheUndoTimer = null;
+    }
+
+    function ficheAnnulerSuppression() {
+      if (!ficheUndo) return;
+      const p = ficheCourant();
+      const u = ficheUndo;
+      ficheUndo = null;
+      ficheFermerUndo();
+      if (!p) return;
+      if (!p[u.cle]) p[u.cle] = [];
+      p[u.cle].splice(Math.min(u.index, p[u.cle].length), 0, u.item);
+      ficheSauvegarderSilencieux();
+      ficheRendreListe(u.cle);
+      ficheProgression();
+      showToast('Suppression annulée', 'fas fa-rotate-left');
+    }
+
+    // ---- Suggestions rapides sous chaque liste ----
+    function ficheRendreChips(cle) {
+      const zone = document.getElementById('chips' + cle.charAt(0).toUpperCase() + cle.slice(1));
+      if (!zone) return;
+      const p = ficheCourant();
+      const deja = ((p && p[cle]) || []).map(function(x) { return String(x.texte).toLowerCase(); });
+      const liste = (SUGGESTIONS[cle] || []).filter(function(t) {
+        return deja.indexOf(t.toLowerCase()) === -1;
+      }).slice(0, 10);
+      zone.innerHTML = '';
+      if (!liste.length) { zone.style.display = 'none'; return; }
+      zone.style.display = '';
+      const lbl = document.createElement('span');
+      lbl.className = 'fiche-chips-lbl';
+      lbl.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> <span data-lang-key="fiche-sugg">Suggestions</span> :';
+      zone.appendChild(lbl);
+      liste.forEach(function(t) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'fiche-chip';
+        b.innerHTML = '<i class="fas fa-plus"></i> ' + ficheEch(t);
+        b.addEventListener('click', function() { ficheChipAjouter(cle, t); });
+        zone.appendChild(b);
+      });
+      if (typeof ficheAppliquerLang === 'function') ficheAppliquerLang();
+    }
+
+    function ficheChipAjouter(cle, texte) {
+      const p = ficheCourant();
+      if (!p) { showToast('Créez ou sélectionnez d\'abord un projet', 'fas fa-exclamation-triangle', true); return; }
+      if (!p[cle]) p[cle] = [];
+      if (p[cle].some(function(x) { return String(x.texte).toLowerCase() === texte.toLowerCase(); })) return;
+      p[cle].push({ id: Date.now() + '' + Math.floor(Math.random() * 1000), texte: texte });
+      ficheSauvegarderSilencieux();
+      ficheRendreListe(cle);
+      ficheProgression();
+      showToast('« ' + texte + ' » ajouté', 'fas fa-check');
+    }
+
+    // ---- Sections repliables + sommaire ----
+    const SECTIONS_KEY = 'ps_fiche_sections';
+
+    function ficheLireSections() {
+      try {
+        const o = JSON.parse(localStorage.getItem(SECTIONS_KEY) || '{}');
+        return o && typeof o === 'object' ? o : {};
+      } catch (e) { return {}; }
+    }
+
+    function ficheInitCollapse() {
+      const etats = ficheLireSections();
+      document.querySelectorAll('#page-fiche .fiche-block').forEach(function(bloc) {
+        if (!bloc.id) return;
+        const head = bloc.querySelector(':scope > .fiche-block-head');
+        if (!head || head.querySelector('.fiche-collapse')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'fiche-collapse';
+        btn.title = 'Replier / déplier';
+        btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          ficheBasculerBloc(bloc);
+        });
+        head.appendChild(btn);
+        if (etats[bloc.id]) bloc.classList.add('collapsed');
+      });
+    }
+
+    function ficheBasculerBloc(bloc, forcer) {
+      if (!bloc) return;
+      const replier = forcer === true ? true : forcer === false ? false : !bloc.classList.contains('collapsed');
+      bloc.classList.toggle('collapsed', replier);
+      if (!bloc.id) return;
+      const etats = ficheLireSections();
+      etats[bloc.id] = replier;
+      try { localStorage.setItem(SECTIONS_KEY, JSON.stringify(etats)); } catch (e) {}
+    }
+
+    function ficheMajNavActif(id) {
+      document.querySelectorAll('#page-fiche .fiche-nav-chip').forEach(function(c) {
+        c.classList.toggle('active', c.getAttribute('data-cible') === id);
+      });
+    }
+
+    function ficheAllerA(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.classList.contains('collapsed')) ficheBasculerBloc(el, false);
+      ficheMajNavActif(id);
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.add('fiche-cible');
+      setTimeout(function() { el.classList.remove('fiche-cible'); }, 1500);
+    }
+
+    // Sommaire : met en surbrillance la section visible pendant le défilement
+    let ficheScrollSpy = null;
+    function ficheInitScrollSpy() {
+      if (ficheScrollSpy || typeof IntersectionObserver === 'undefined') return;
+      const cibles = [];
+      document.querySelectorAll('#page-fiche .fiche-nav-chip').forEach(function(c) {
+        const id = c.getAttribute('data-cible');
+        const el = id ? document.getElementById(id) : null;
+        if (el) cibles.push(el);
+      });
+      if (!cibles.length) return;
+      ficheScrollSpy = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+          if (en.isIntersecting) ficheMajNavActif(en.target.id);
+        });
+      }, { rootMargin: '-38% 0px -52% 0px', threshold: 0 });
+      cibles.forEach(function(el) { ficheScrollSpy.observe(el); });
+    }
+
+    function ficheMajNav(p) {
+      const etats = {
+        blocNom: !!(p && p.nom),
+        blocMembres: !!(p && (p.membres || []).filter(membreRempli).length),
+        blocObjectifs: !!(p && (p.objectifs || []).length),
+        blocEtapes: !!(p && (p.etapes || []).length),
+        blocMateriel: !!(p && ((p.materiel || []).length || (p.reactifs || []).length)),
+        blocModeOperatoire: !!(p && String(p.methode || '').trim()),
+        blocResultat: !!(p && p.resultat && p.interpretation),
+        blocPhotos: !!(p && (p.photos || []).filter(Boolean).length),
+        blocValidation: ficheEstValide(p)
+      };
+      Object.keys(etats).forEach(function(id) {
+        const chip = document.querySelector('.fiche-nav-chip[data-cible="' + id + '"]');
+        if (chip) chip.classList.toggle('done', etats[id]);
+      });
+    }
+
+    // ---- Raccourcis clavier du formulaire ----
+    let ficheRaccourcisPrets = false;
+    function ficheInitRaccourcis() {
+      if (ficheRaccourcisPrets) return;
+      ficheRaccourcisPrets = true;
+      document.addEventListener('keydown', function(e) {
+        const page = document.getElementById('page-fiche');
+        if (!page || !page.classList.contains('active')) return;
+        if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 's') {
+          e.preventDefault();
+          ficheSauvegarder();
+          return;
+        }
+        if (e.key === 'Escape' && ficheEdition) {
+          e.preventDefault();
+          ficheListEditAnnuler();
+        }
+      });
+    }
+
+    function ficheInitDynamique() {
+      ficheInitCollapse();
+      ficheInitRaccourcis();
+      ficheInitScrollSpy();
     }
 
     // ---- Progression ----
+    let ficheMethodeTimer = null;
+
     function ficheMethodeAutoSave() {
       const p = ficheCourant();
       if (!p) return;
-      p.methode = document.getElementById('ficheMethode').value;
-      ficheSauvegarderSilencieux();
+      const el = document.getElementById('ficheMethode');
+      p.methode = el ? el.value : '';
+      const pm = document.getElementById('printMethode');
+      if (pm) pm.textContent = p.methode;
       ficheProgression();
+      clearTimeout(ficheMethodeTimer);
+      ficheMethodeTimer = setTimeout(function() {
+        ficheSauvegarderSilencieux();
+      }, 700);
     }
 
     // ---- Résultat et interprétation (enregistrement automatique différé) ----
@@ -3329,21 +3903,126 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = ficheCourant();
       let pct = 0;
       if (p) {
-        const parts = [];
-        if (p.nom) parts.push(1);
-        parts.push(Math.min(1, (p.membres || []).filter(membreRempli).length / 3));
-        parts.push(p.objectifs && p.objectifs.length ? 1 : 0);
-        parts.push(p.etapes && p.etapes.length ? 1 : 0);
-        parts.push(p.materiel && p.materiel.length ? 1 : 0);
-        parts.push(p.reactifs && p.reactifs.length ? 1 : 0);
-        parts.push(p.methode ? 1 : 0);
-        parts.push(p.resultat ? 1 : 0);
-        parts.push(p.interpretation ? 1 : 0);
+        const membresOk = Math.min(1, (p.membres || []).filter(membreRempli).length / 3);
+        const resOk = (p.resultat ? 0.5 : 0) + (p.interpretation ? 0.5 : 0);
+        const photosOk = (p.photos || []).filter(Boolean).length ? 1 : 0;
+        const parts = [
+          p.nom ? 1 : 0,
+          membresOk,
+          (p.objectifs || []).length ? 1 : 0,
+          (p.etapes || []).length ? 1 : 0,
+          (p.materiel || []).length ? 1 : 0,
+          (p.reactifs || []).length ? 1 : 0,
+          p.methode ? 1 : 0,
+          resOk,
+          photosOk,
+          ficheEstValide(p) ? 1 : 0
+        ];
         pct = Math.round(parts.reduce(function(a, b) { return a + b; }, 0) / parts.length * 100);
       }
       document.getElementById('ficheProgBar').style.width = pct + '%';
       document.getElementById('ficheProgTxt').textContent = pct + '%';
-      document.getElementById('ficheCtx').textContent = p ? ('Fiche active : ' + p.nom) : 'Aucun projet sélectionné';
+      const ring = document.getElementById('ficheRingFg');
+      if (ring) ring.style.strokeDashoffset = String(113.1 - (113.1 * pct / 100));
+      const ringTxt = document.getElementById('ficheRingTxt');
+      if (ringTxt) ringTxt.textContent = pct + '%';
+      document.getElementById('ficheCtx').textContent = p ? ('Fiche active : ' + (p.nom || 'sans nom')) : 'Aucun projet sélectionné';
+      ficheMajNav(p);
+      ficheRendreValidation();
+    }
+
+    // ---- Validation et sauvegarde de la fiche ----
+    const VALIDATION_ETAPES = [
+      { id: 'blocNom', k: 'val-nom', lbl: 'Nom du projet', ok: function(p) { return !!String(p.nom || '').trim(); } },
+      { id: 'blocMembres', k: 'val-membres', lbl: 'Membres du projet', ok: function(p) { return (p.membres || []).filter(membreRempli).length > 0; } },
+      { id: 'blocObjectifs', k: 'val-objectifs', lbl: 'Objectifs', ok: function(p) { return (p.objectifs || []).length > 0; } },
+      { id: 'blocEtapes', k: 'val-etapes', lbl: 'Étapes du projet', ok: function(p) { return (p.etapes || []).length > 0; } },
+      { id: 'blocMateriel', k: 'val-materiel', lbl: 'Matériel nécessaire', ok: function(p) { return (p.materiel || []).length > 0; } },
+      { id: 'blocReactifs52', k: 'val-reactifs', lbl: 'Réactifs nécessaires', ok: function(p) { return (p.reactifs || []).length > 0; } },
+      { id: 'blocModeOperatoire', k: 'val-methode', lbl: 'Mode opératoire', ok: function(p) { return !!String(p.methode || '').trim(); } },
+      { id: 'blocResultat', k: 'val-resultat', lbl: 'Résultats obtenus', ok: function(p) { return !!String(p.resultat || '').trim(); } },
+      { id: 'blocResultat', k: 'val-interpretation', lbl: 'Interprétation', ok: function(p) { return !!String(p.interpretation || '').trim(); } }
+    ];
+
+    // Empreinte des données de la fiche : permet de savoir si la fiche
+    // a été modifiée depuis la dernière validation.
+    function ficheEmpreinte(p) {
+      if (!p) return '';
+      const txt = function(arr) { return (arr || []).map(function(x) { return x && x.texte ? x.texte : ''; }); };
+      const mem = (p.membres || []).map(function(m) { return m ? ((m.nom || '') + ' ' + (m.prenom || '')).trim() : ''; });
+      const pho = (p.photos || []).map(function(x) { return x ? String(x).length + ':' + String(x).slice(-28) : ''; });
+      return JSON.stringify([
+        String(p.nom || ''), mem, txt(p.objectifs), txt(p.etapes), txt(p.materiel), txt(p.reactifs),
+        String(p.methode || ''), String(p.resultat || ''), String(p.interpretation || ''), pho
+      ]);
+    }
+
+    function ficheEstValide(p) {
+      return !!(p && p.valide && p.valideEmpreinte && p.valideEmpreinte === ficheEmpreinte(p));
+    }
+
+    function ficheRendreValidation() {
+      const grid = document.getElementById('ficheValidationGrid');
+      const p = ficheCourant();
+      let lang = 'fr';
+      try { lang = localStorage.getItem(LANG_KEY) || 'fr'; } catch (e) {}
+      const dict = langDico(lang);
+      if (grid) {
+        grid.innerHTML = VALIDATION_ETAPES.map(function(e) {
+          const ok = !!(p && e.ok(p));
+          return '<button type="button" class="fiche-validation-item' + (ok ? ' done' : '') + '"' +
+            ' onclick="ficheAllerA(\'' + e.id + '\')">' +
+            '<i class="fas ' + (ok ? 'fa-circle-check' : 'fa-circle') + '"></i>' +
+            '<span>' + ficheEch(dict[e.k] || e.lbl) + '</span>' +
+            '<em>' + (ok ? (dict['val-ok'] || 'Rempli') : (dict['val-ko'] || 'À compléter')) + '</em>' +
+          '</button>';
+        }).join('');
+      }
+      const badge = document.getElementById('ficheValideBadge');
+      if (badge) {
+        const fait = ficheEstValide(p);
+        const modifiee = !!(p && p.valide && !fait);
+        badge.classList.toggle('fait', fait);
+        badge.classList.toggle('modifiee', modifiee);
+        badge.innerHTML = fait
+          ? '<i class="fas fa-circle-check"></i> ' + (dict['val-badge-ok'] || 'Validée')
+          : modifiee
+            ? '<i class="fas fa-pen"></i> ' + (dict['val-badge-mod'] || 'Modifiée — à revalider')
+            : '<i class="fas fa-hourglass-half"></i> ' + (dict['val-badge-ko'] || 'Non validée');
+      }
+      const date = document.getElementById('ficheValideDate');
+      if (date) {
+        date.textContent = p && p.valideLe
+          ? (dict['val-date-prefix'] || 'Dernière validation : ') + new Date(p.valideLe).toLocaleString(lang === 'ar' ? 'ar-DZ' : lang === 'en' ? 'en-GB' : 'fr-FR')
+          : (dict['val-date'] || 'La validation enregistre toutes les données de la fiche et son état d\'avancement.');
+      }
+    }
+
+    function ficheValider() {
+      const p = ficheCourant();
+      if (!p) { showToast('Créez ou sélectionnez d\'abord un projet', 'fas fa-exclamation-triangle', true); return; }
+      const manquants = VALIDATION_ETAPES.filter(function(e) { return !e.ok(p); });
+      ficheRendreValidation();
+      if (manquants.length) {
+        let lang = 'fr';
+        try { lang = localStorage.getItem(LANG_KEY) || 'fr'; } catch (e) {}
+        const dict = langDico(lang);
+        p.valide = false;
+        p.valideEmpreinte = '';
+        ficheSauvegarderSilencieux();
+        showToast('À compléter : ' + manquants.map(function(e) { return dict[e.k] || e.lbl; }).join(', '), 'fas fa-exclamation-triangle', true);
+        if (manquants[0].id) ficheAllerA(manquants[0].id);
+        ficheProgression();
+        return;
+      }
+      p.valide = true;
+      p.valideLe = Date.now();
+      p.valideEmpreinte = ficheEmpreinte(p);
+      Promise.resolve(ficheSauvegarder()).then(function() {
+        ficheRendreValidation();
+        ficheProgression();
+      });
+      showToast('Fiche validée et sauvegardée', 'fas fa-circle-check');
     }
 
     function ficheToutRendre() {
@@ -3354,6 +4033,9 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = ficheCourant();
       m.value = p && p.methode ? p.methode : '';
       m.disabled = !p;
+      m.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
+      const pm = document.getElementById('printMethode');
+      if (pm) pm.textContent = m.value;
       const rf = document.getElementById('ficheResultat');
       const ri = document.getElementById('ficheInterpretation');
       if (rf) {
@@ -3367,6 +4049,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         ri.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
       }
       ficheMajResultat();
+      ficheRendrePhotos();
       ficheProgression();
       notationRendreSelect();
       notationRendreMembres();
@@ -3415,9 +4098,15 @@ const STU_KEY = 'ps_stagiaire_tel';
         ? '@media print { @page { size: A3 portrait; margin: 12mm; } }'
         : '@media print { @page { size: A4 portrait; margin: 15mm; } }';
       document.head.appendChild(style);
+      const replies = [];
+      document.querySelectorAll('#page-fiche .fiche-block.collapsed').forEach(function(b) {
+        replies.push(b);
+        b.classList.remove('collapsed');
+      });
       const cleanup = function() {
         const s = document.getElementById('fichePageStyle');
         if (s) s.remove();
+        replies.forEach(function(b) { b.classList.add('collapsed'); });
         window.removeEventListener('afterprint', cleanup);
       };
       window.addEventListener('afterprint', cleanup);
@@ -3435,10 +4124,10 @@ const STU_KEY = 'ps_stagiaire_tel';
         { t: '3. Objectifs du projet', v: (p.objectifs || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
         { t: '4. Étapes du projet', v: (p.etapes || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
         { t: '5-1. Matériel nécessaire', v: (p.materiel || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
-        { t: '5-2. Méthode', v: p.methode ? [p.methode] : [] },
-        { t: '5-3. Réactifs nécessaires', v: (p.reactifs || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
-        { t: '6-1. Résultats obtenus', v: p.resultat ? [p.resultat] : [] },
-        { t: '6-2. Interprétation', v: p.interpretation ? [p.interpretation] : [] }
+        { t: '5-2. Réactifs nécessaires', v: (p.reactifs || []).map(function(o, i) { return (i + 1) + '. ' + o.texte; }) },
+        { t: '6. Mode opératoire', v: p.methode ? [p.methode] : [] },
+        { t: '7-1. Résultats obtenus', v: p.resultat ? [p.resultat] : [] },
+        { t: '7-2. Interprétation', v: p.interpretation ? [p.interpretation] : [] }
       ];
     }
 
@@ -4195,6 +4884,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       await profLoad();
       await ficheLoad();
       ficheDates();
+      ficheInitDynamique();
       archCharger();
       notationRendreSelect();
       initAccueilLang();

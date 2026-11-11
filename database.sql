@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `projet_materiel` (
     FOREIGN KEY (`projet_id`) REFERENCES `projets`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table des Photos des Projets (jusqu'à 8 photos)
+-- Table des Photos des Projets (jusqu'à 10 photos)
 CREATE TABLE IF NOT EXISTS `projet_photos` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `projet_id` INT NOT NULL,

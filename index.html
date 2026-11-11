@@ -220,11 +220,52 @@
         <h2><i class="fas fa-folder-open"></i> <span data-lang-key="h-fiche">Fiche Projet</span> <span class="auto-note"><i class="fas fa-bolt"></i> Sauvegarde locale automatique</span></h2>
 
         <div class="fiche-prog-wrap">
-          <span class="fiche-count" id="ficheCtx">Aucun projet sélectionné</span>
-          <div class="fiche-prog"><span id="ficheProgBar"></span></div>
+          <div class="fiche-ring" id="ficheRing" title="Avancement de la fiche">
+            <svg viewBox="0 0 44 44" aria-hidden="true">
+              <circle class="fiche-ring-bg" cx="22" cy="22" r="18"></circle>
+              <circle class="fiche-ring-fg" id="ficheRingFg" cx="22" cy="22" r="18"></circle>
+            </svg>
+            <span class="fiche-ring-txt" id="ficheRingTxt">0%</span>
+          </div>
+          <div class="fiche-prog-mid">
+            <span class="fiche-count" id="ficheCtx">Aucun projet sélectionné</span>
+            <div class="fiche-prog"><span id="ficheProgBar"></span></div>
+          </div>
           <span class="fiche-prog-txt" id="ficheProgTxt">0%</span>
           <span class="fiche-saved-flash" id="ficheFlash"><i class="fas fa-check"></i> Sauvegardé</span>
         </div>
+
+        <!-- Sommaire dynamique : navigation + état de remplissage -->
+        <nav class="fiche-nav" id="ficheNav" aria-label="Sommaire de la fiche">
+          <span class="fiche-nav-title"><i class="fas fa-list-check"></i> <span data-lang-key="fiche-nav">Sommaire</span></span>
+          <button type="button" class="fiche-nav-chip" data-cible="blocNom" onclick="ficheAllerA('blocNom')">
+            <span class="fiche-nav-num">1</span><span data-lang-key="fiche-nav1">Nom</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocMembres" onclick="ficheAllerA('blocMembres')">
+            <span class="fiche-nav-num">2</span><span data-lang-key="fiche-nav2">Membres</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocObjectifs" onclick="ficheAllerA('blocObjectifs')">
+            <span class="fiche-nav-num">3</span><span data-lang-key="fiche-nav3">Objectifs</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocEtapes" onclick="ficheAllerA('blocEtapes')">
+            <span class="fiche-nav-num">4</span><span data-lang-key="fiche-nav4">Étapes</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocMateriel" onclick="ficheAllerA('blocMateriel')">
+            <span class="fiche-nav-num">5</span><span data-lang-key="fiche-nav5">Matériel</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocModeOperatoire" onclick="ficheAllerA('blocModeOperatoire')">
+            <span class="fiche-nav-num">6</span><span data-lang-key="fiche-nav6">Mode opératoire</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocResultat" onclick="ficheAllerA('blocResultat')">
+            <span class="fiche-nav-num">7</span><span data-lang-key="fiche-nav7">Résultat</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocPhotos" onclick="ficheAllerA('blocPhotos')">
+            <span class="fiche-nav-num">8</span><span data-lang-key="fiche-nav8">Photos</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+          <button type="button" class="fiche-nav-chip" data-cible="blocValidation" onclick="ficheAllerA('blocValidation')">
+            <span class="fiche-nav-num">9</span><span data-lang-key="fiche-nav9">Validation</span><i class="fas fa-check fiche-nav-check"></i>
+          </button>
+        </nav>
 
         <!-- En-tête officiel (impression uniquement) -->
         <div class="fiche-print-head" id="fichePrintHead"></div>
@@ -240,7 +281,7 @@
         </div>
 
         <!-- 1 - Nom du projet -->
-        <div class="fiche-block">
+        <div class="fiche-block" id="blocNom">
           <div class="fiche-block-head">
             <span class="fiche-num">1</span>
             <span class="fiche-ic"><i class="fas fa-folder-open"></i></span>
@@ -268,7 +309,7 @@
         </div>
 
         <!-- 2 - Les membres du projet -->
-        <div class="fiche-block">
+        <div class="fiche-block" id="blocMembres">
           <div class="fiche-block-head">
             <span class="fiche-num">2</span>
             <span class="fiche-ic"><i class="fas fa-users"></i></span>
@@ -289,7 +330,7 @@
         </div>
 
         <!-- 3 - Objectifs du projet -->
-        <div class="fiche-block">
+        <div class="fiche-block" id="blocObjectifs">
           <div class="fiche-block-head">
             <span class="fiche-num">3</span>
             <span class="fiche-ic"><i class="fas fa-bullseye"></i></span>
@@ -307,11 +348,12 @@
             <button class="btn btn-success" onclick="ficheListAdd('objectifs')"><i class="fas fa-plus"></i> Ajouter</button>
             <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
           </div>
+          <div class="fiche-chips" id="chipsObjectifs"></div>
           <div class="fiche-list" id="listeObjectifs"></div>
         </div>
 
         <!-- 4 - Étapes du projet -->
-        <div class="fiche-block">
+        <div class="fiche-block" id="blocEtapes">
           <div class="fiche-block-head">
             <span class="fiche-num">4</span>
             <span class="fiche-ic"><i class="fas fa-list-ol"></i></span>
@@ -329,56 +371,41 @@
             <button class="btn btn-success" onclick="ficheListAdd('etapes')"><i class="fas fa-plus"></i> Ajouter</button>
             <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
           </div>
+          <div class="fiche-chips" id="chipsEtapes"></div>
           <div class="fiche-list" id="listeEtapes"></div>
         </div>
 
         <!-- 5 - Matériel et méthode -->
-        <div class="fiche-block">
+        <div class="fiche-block" id="blocMateriel">
           <div class="fiche-block-head">
             <span class="fiche-num">5</span>
             <span class="fiche-ic"><i class="fas fa-toolbox"></i></span>
             <span data-lang-key="fiche-b5">Matériel et méthode</span>
           </div>
-          <div class="fiche-block fiche-subblock">
+          <div class="fiche-block fiche-subblock" id="blocMateriel51">
             <div class="fiche-block-head">
               <span class="fiche-num sub">5-1</span>
               <span class="fiche-ic sub"><i class="fas fa-wrench"></i></span>
               <span data-lang-key="fiche-b51">Matériel nécessaire</span>
               <span class="fiche-count" id="cntMateriel"></span>
-            <div class="fiche-block-tools">
-              <button class="btn btn-success" onclick="ficheAction('ajouter','materiel')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
-              <button class="btn btn-accent" onclick="ficheAction('modifier','materiel')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
-              <button class="btn btn-danger" onclick="ficheAction('supprimer','materiel')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
-            </div>
+              <div class="fiche-block-tools">
+                <button class="btn btn-success" onclick="ficheAction('ajouter','materiel')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+                <button class="btn btn-accent" onclick="ficheAction('modifier','materiel')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+                <button class="btn btn-danger" onclick="ficheAction('supprimer','materiel')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              </div>
             </div>
             <div class="fiche-add-row">
               <input type="text" id="inpMateriel" placeholder="Matériel nécessaire..." onkeydown="if(event.key==='Enter') ficheListAdd('materiel')">
               <button class="btn btn-success" onclick="ficheListAdd('materiel')"><i class="fas fa-plus"></i> Ajouter</button>
               <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
             </div>
+            <div class="fiche-chips" id="chipsMateriel"></div>
             <div class="fiche-list" id="listeMateriel"></div>
           </div>
-          <div class="fiche-block fiche-subblock">
+          <div class="fiche-block fiche-subblock" id="blocReactifs52">
             <div class="fiche-block-head">
               <span class="fiche-num sub">5-2</span>
-              <span class="fiche-ic sub"><i class="fas fa-route"></i></span>
-              <span data-lang-key="fiche-b52">Méthode (démarche adoptée)</span>
-              <div class="fiche-block-tools">
-                <button class="btn btn-success" onclick="ficheAction('ajouter','methode')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
-                <button class="btn btn-accent" onclick="ficheAction('modifier','methode')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
-                <button class="btn btn-danger" onclick="ficheAction('supprimer','methode')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
-              </div>
-            </div>
-            <textarea id="ficheMethode" rows="4" style="width:100%;" placeholder="Décrivez la démarche méthodologique adoptée..." oninput="ficheMethodeAutoSave()"></textarea>
-            <div class="action-buttons" style="margin-top:.7rem;">
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder la méthode</button>
-            </div>
-          </div>
-          <div class="fiche-block fiche-subblock">
-            <div class="fiche-block-head">
-              <span class="fiche-num sub">5-3</span>
               <span class="fiche-ic sub"><i class="fas fa-flask"></i></span>
               <span data-lang-key="fiche-b53">Réactifs nécessaires</span>
               <span class="fiche-count" id="cntReactifs"></span>
@@ -394,17 +421,42 @@
               <button class="btn btn-success" onclick="ficheListAdd('reactifs')"><i class="fas fa-plus"></i> Ajouter</button>
               <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
             </div>
+            <div class="fiche-chips" id="chipsReactifs"></div>
             <div class="fiche-list" id="listeReactifs"></div>
           </div>
         </div>
-        <!-- 6 - Résultat et interprétation -->
-        <div class="fiche-block fiche-block-resultat" id="blocResultat">
+
+        <!-- 6 - Mode opératoire -->
+        <div class="fiche-block" id="blocModeOperatoire">
           <div class="fiche-block-head">
             <span class="fiche-num">6</span>
+            <span class="fiche-ic"><i class="fas fa-route"></i></span>
+            <span data-lang-key="fiche-b52">Mode opératoire</span>
+            <span class="auto-note"><i class="fas fa-bolt"></i> Enregistrement automatique</span>
+            <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="ficheAction('ajouter','methode')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="ficheAction('modifier','methode')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="ficheAction('supprimer','methode')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            </div>
+          </div>
+          <textarea id="ficheMethode" rows="6" style="width:100%;" placeholder="Décrivez le mode opératoire : préparation, montage, mesures, précautions de sécurité..." oninput="ficheMethodeAutoSave()"></textarea>
+          <div class="fiche-print-only" id="printMethode"></div>
+          <div class="action-buttons" style="margin-top:.7rem;">
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder le mode opératoire</button>
+          </div>
+        </div>
+        <!-- 7 - Résultat et interprétation -->
+        <div class="fiche-block fiche-block-resultat" id="blocResultat">
+          <div class="fiche-block-head">
+            <span class="fiche-num">7</span>
             <span class="fiche-ic resultat"><i class="fas fa-chart-line"></i></span>
             <span data-lang-key="fiche-b7">Résultat et interprétation</span>
             <span class="auto-note"><i class="fas fa-bolt"></i> Enregistrement automatique</span>
             <div class="fiche-block-tools">
+              <button class="btn btn-success" onclick="ficheAction('ajouter','resultat')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+              <button class="btn btn-accent" onclick="ficheAction('modifier','resultat')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+              <button class="btn btn-danger" onclick="ficheAction('supprimer','resultat')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
               <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
             </div>
           </div>
@@ -419,6 +471,12 @@
                 <span class="resultat-compteur" id="cntResultat"></span>
               </div>
               <textarea id="ficheResultat" rows="6" placeholder="Décrivez les résultats obtenus : mesures, observations, productions, réussites..." oninput="ficheResultatAutoSave('resultat')"></textarea>
+              <div class="resultat-panel-tools">
+                <button class="btn btn-success" onclick="ficheAction('ajouter','resultat')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+                <button class="btn btn-accent" onclick="ficheAction('modifier','resultat')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+                <button class="btn btn-danger" onclick="ficheAction('supprimer','resultat')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              </div>
               <div class="fiche-print-only" id="printResultat"></div>
             </div>
             <div class="resultat-panel alt">
@@ -431,18 +489,24 @@
                 <span class="resultat-compteur" id="cntInterpretation"></span>
               </div>
               <textarea id="ficheInterpretation" rows="6" placeholder="Analysez les résultats : explication, comparaison avec les objectifs, difficultés et conclusion..." oninput="ficheResultatAutoSave('interpretation')"></textarea>
+              <div class="resultat-panel-tools">
+                <button class="btn btn-success" onclick="ficheAction('ajouter','interpretation')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
+                <button class="btn btn-accent" onclick="ficheAction('modifier','interpretation')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
+                <button class="btn btn-danger" onclick="ficheAction('supprimer','interpretation')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              </div>
               <div class="fiche-print-only" id="printInterpretation"></div>
             </div>
           </div>
         </div>
 
-        <!-- 7 - Photos du projet -->
-        <div class="fiche-block photos">
+        <!-- 8 - Photos du projet -->
+        <div class="fiche-block photos" id="blocPhotos">
           <div class="fiche-block-head">
-            <span class="fiche-num">7</span>
+            <span class="fiche-num">8</span>
             <span class="fiche-ic"><i class="fas fa-images"></i></span>
             <span data-lang-key="fiche-b6">Photos du projet</span>
-            <span class="fiche-count" data-lang-key="fiche-b6s">8 emplacements — modifiables par le professeur et les stagiaires</span>
+            <span class="fiche-count" data-lang-key="fiche-b6s">10 emplacements (1 à 10) — modifiables par le professeur et les stagiaires</span>
             <div class="fiche-block-tools">
               <button class="btn btn-success" onclick="fichePhotoAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-photo-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="fichePhotoModifier()"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
@@ -452,6 +516,30 @@
           </div>
           <div class="photos-grid" id="photosGrid"></div>
           <input type="file" id="fichePhotoInput" accept="image/*" style="display:none;" onchange="fichePhotoFichier(this)">
+        </div>
+
+        <!-- 9 - Validation et sauvegarde -->
+        <div class="fiche-block fiche-block-validation" id="blocValidation">
+          <div class="fiche-block-head">
+            <span class="fiche-num">9</span>
+            <span class="fiche-ic validation"><i class="fas fa-clipboard-check"></i></span>
+            <span data-lang-key="fiche-b9">Validation et sauvegarde</span>
+            <span class="fiche-valide-badge" id="ficheValideBadge"><i class="fas fa-hourglass-half"></i> Non validée</span>
+          </div>
+          <p class="fiche-validation-info" data-lang-key="fiche-b9s">Vérifiez que toutes les sections sont remplies, puis validez : l'ensemble des données de la fiche est enregistré.</p>
+          <div class="fiche-validation-grid" id="ficheValidationGrid"></div>
+          <p class="fiche-validation-date" id="ficheValideDate"></p>
+          <div class="action-buttons" style="margin-top:.9rem;">
+            <button class="btn btn-success" onclick="ficheValider()"><i class="fas fa-circle-check"></i> <span data-lang-key="b-valider-fiche">Valider et sauvegarder la fiche</span></button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+          </div>
+        </div>
+
+        <!-- Barre d'annulation (suppression d'un élément de liste) -->
+        <div class="fiche-undo" id="ficheUndo" role="status" aria-live="polite">
+          <span class="fiche-undo-txt"><i class="fas fa-trash-can"></i> <span id="ficheUndoTxt"></span></span>
+          <button type="button" class="btn btn-accent" onclick="ficheAnnulerSuppression()"><i class="fas fa-rotate-left"></i> <span data-lang-key="fiche-undo-btn">Annuler</span></button>
+          <button type="button" class="fiche-undo-close" onclick="ficheFermerUndo()" title="Fermer"><i class="fas fa-xmark"></i></button>
         </div>
       </section>
     </section>
