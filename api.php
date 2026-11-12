@@ -122,8 +122,14 @@ switch ($action) {
         }
 
         $idDb = $data['id_db'] ?? $data['id'] ?? null;
-
+        $existe = false;
         if (!empty($idDb) && is_numeric($idDb)) {
+            $check = $pdo->prepare("SELECT id FROM stagiaires WHERE id = ?");
+            $check->execute([$idDb]);
+            $existe = (bool) $check->fetchColumn();
+        }
+
+        if ($existe) {
             // Modification
             $stmt = $pdo->prepare("UPDATE stagiaires SET nom = ?, prenom = ?, phone = ?, password = ?, specialite_id = ?, semestre = ?, photo = ? WHERE id = ?");
             $stmt->execute([$data['nom'], $data['prenom'] ?? '', $data['phone'], $data['pass'] ?? '', $specId, $data['semestre'] ?? 'S1', $data['photo'] ?? '', $idDb]);
@@ -273,11 +279,21 @@ switch ($action) {
 
         $pdo->beginTransaction();
 
+        $pId = null;
         if (!empty($p['id']) && is_numeric($p['id'])) {
+            // L'identifiant peut être un identifiant temporaire créé par le navigateur :
+            // on vérifie qu'il existe vraiment en base avant de faire un UPDATE.
+            $check = $pdo->prepare("SELECT id FROM projets WHERE id = ?");
+            $check->execute([$p['id']]);
+            if ($check->fetchColumn()) {
+                $pId = $p['id'];
+            }
+        }
+
+        if ($pId !== null) {
             // Met à jour
             $stmt = $pdo->prepare("UPDATE projets SET nom = ?, methode = ? WHERE id = ?");
-            $stmt->execute([$p['nom'], $p['methode'] ?? '', $p['id']]);
-            $pId = $p['id'];
+            $stmt->execute([$p['nom'], $p['methode'] ?? '', $pId]);
         } else {
             // Nouveau projet
             $stmt = $pdo->prepare("INSERT INTO projets (nom, methode) VALUES (?, ?)");

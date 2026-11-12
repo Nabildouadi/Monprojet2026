@@ -3,6 +3,18 @@ setlocal EnableExtensions
 title Installation de la base MySQL
 cd /d "%~dp0"
 
+rem ---- Serveur portable PHP + MariaDB fourni avec le projet ----
+if exist "%~dp0serveur\php\php.exe" if exist "%~dp0serveur\mariadb\bin\mysqld.exe" (
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0serveur\serveur.ps1" -Action Install
+  if errorlevel 1 (
+    echo.
+    echo   Installation automatique impossible. Voir serveur\mysqld.err
+    echo.
+    pause
+  )
+  exit /b 0
+)
+
 call :chercher_php
 if not defined PHP goto :sansphp
 
@@ -17,9 +29,10 @@ if not errorlevel 1 (
 )
 
 netstat -an 2>nul | findstr /c:":3306 " >nul
+if errorlevel 1 netstat -an 2>nul | findstr /c:":3307 " >nul
 if errorlevel 1 (
   echo.
-  echo   ATTENTION : MySQL ne semble pas demarre ^(port 3306^).
+  echo   ATTENTION : MySQL ne semble pas demarre ^(ports 3306 / 3307^).
   echo   Demarrez XAMPP ou WAMP ^(bouton Start MySQL^), puis relancez.
   echo.
   pause
@@ -40,7 +53,7 @@ echo.
 ping -n 3 127.0.0.1 >nul 2>nul
 start "" "http://127.0.0.1:%PORT%/install.php"
 
-"%PHP%" -S 127.0.0.1:%PORT%
+"%PHP%" -S 127.0.0.1:%PORT% -t "%~dp0"
 
 echo.
 echo ------------------------------------------------------------

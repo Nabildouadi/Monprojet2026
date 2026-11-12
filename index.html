@@ -303,7 +303,7 @@
             <button class="btn btn-success" onclick="projAjouter()"><i class="fas fa-plus"></i> Ajouter</button>
             <button class="btn btn-accent" onclick="projModifier()"><i class="fas fa-pen"></i> Modifier</button>
             <button class="btn btn-danger" onclick="projSupprimer()"><i class="fas fa-trash"></i> Supprimer</button>
-            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer</button>
           </div>
           <div class="proj-grid" id="projGrid"></div>
         </div>
@@ -319,12 +319,12 @@
               <button class="btn btn-success" onclick="ficheAction('ajouter','membres')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="ficheAction('modifier','membres')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="ficheAction('supprimer','membres')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
             </div>
           </div>
           <div class="member-grid" id="memberGrid"></div>
           <div class="action-buttons" style="margin-top:1rem;">
-            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder les membres</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer les membres</button>
             <button class="btn btn-secondary" onclick="membreToutVider()"><i class="fas fa-eraser"></i> Vider les 5 fiches</button>
           </div>
         </div>
@@ -340,13 +340,13 @@
               <button class="btn btn-success" onclick="ficheAction('ajouter','objectifs')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="ficheAction('modifier','objectifs')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="ficheAction('supprimer','objectifs')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
             </div>
           </div>
           <div class="fiche-add-row">
             <input type="text" id="inpObjectif" placeholder="Objectif du projet..." onkeydown="if(event.key==='Enter') ficheListAdd('objectifs')">
             <button class="btn btn-success" onclick="ficheListAdd('objectifs')"><i class="fas fa-plus"></i> Ajouter</button>
-            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer</button>
           </div>
           <div class="fiche-chips" id="chipsObjectifs"></div>
           <div class="fiche-list" id="listeObjectifs"></div>
@@ -363,13 +363,13 @@
               <button class="btn btn-success" onclick="ficheAction('ajouter','etapes')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="ficheAction('modifier','etapes')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="ficheAction('supprimer','etapes')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
             </div>
           </div>
           <div class="fiche-add-row">
             <input type="text" id="inpEtape" placeholder="Étape du projet..." onkeydown="if(event.key==='Enter') ficheListAdd('etapes')">
             <button class="btn btn-success" onclick="ficheListAdd('etapes')"><i class="fas fa-plus"></i> Ajouter</button>
-            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer</button>
           </div>
           <div class="fiche-chips" id="chipsEtapes"></div>
           <div class="fiche-list" id="listeEtapes"></div>
@@ -392,13 +392,13 @@
                 <button class="btn btn-success" onclick="ficheAction('ajouter','materiel')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
                 <button class="btn btn-accent" onclick="ficheAction('modifier','materiel')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
                 <button class="btn btn-danger" onclick="ficheAction('supprimer','materiel')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
               </div>
             </div>
             <div class="fiche-add-row">
               <input type="text" id="inpMateriel" placeholder="Matériel nécessaire..." onkeydown="if(event.key==='Enter') ficheListAdd('materiel')">
               <button class="btn btn-success" onclick="ficheListAdd('materiel')"><i class="fas fa-plus"></i> Ajouter</button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer</button>
             </div>
             <div class="fiche-chips" id="chipsMateriel"></div>
             <div class="fiche-list" id="listeMateriel"></div>
@@ -413,13 +413,13 @@
                 <button class="btn btn-success" onclick="ficheAction('ajouter','reactifs')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
                 <button class="btn btn-accent" onclick="ficheAction('modifier','reactifs')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
                 <button class="btn btn-danger" onclick="ficheAction('supprimer','reactifs')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
               </div>
             </div>
             <div class="fiche-add-row">
               <input type="text" id="inpReactif" placeholder="Réactif nécessaire..." onkeydown="if(event.key==='Enter') ficheListAdd('reactifs')">
               <button class="btn btn-success" onclick="ficheListAdd('reactifs')"><i class="fas fa-plus"></i> Ajouter</button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder</button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer</button>
             </div>
             <div class="fiche-chips" id="chipsReactifs"></div>
             <div class="fiche-list" id="listeReactifs"></div>
@@ -437,13 +437,13 @@
               <button class="btn btn-success" onclick="ficheAction('ajouter','methode')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="ficheAction('modifier','methode')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="ficheAction('supprimer','methode')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
             </div>
           </div>
           <textarea id="ficheMethode" rows="6" style="width:100%;" placeholder="Décrivez le mode opératoire : préparation, montage, mesures, précautions de sécurité..." oninput="ficheMethodeAutoSave()"></textarea>
           <div class="fiche-print-only" id="printMethode"></div>
           <div class="action-buttons" style="margin-top:.7rem;">
-            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Sauvegarder le mode opératoire</button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> Enregistrer le mode opératoire</button>
           </div>
         </div>
         <!-- 7 - Résultat et interprétation -->
@@ -457,7 +457,7 @@
               <button class="btn btn-success" onclick="ficheAction('ajouter','resultat')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="ficheAction('modifier','resultat')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="ficheAction('supprimer','resultat')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
             </div>
           </div>
           <div class="resultat-grid">
@@ -475,7 +475,7 @@
                 <button class="btn btn-success" onclick="ficheAction('ajouter','resultat')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
                 <button class="btn btn-accent" onclick="ficheAction('modifier','resultat')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
                 <button class="btn btn-danger" onclick="ficheAction('supprimer','resultat')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
               </div>
               <div class="fiche-print-only" id="printResultat"></div>
             </div>
@@ -493,7 +493,7 @@
                 <button class="btn btn-success" onclick="ficheAction('ajouter','interpretation')"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
                 <button class="btn btn-accent" onclick="ficheAction('modifier','interpretation')"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
                 <button class="btn btn-danger" onclick="ficheAction('supprimer','interpretation')"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+                <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
               </div>
               <div class="fiche-print-only" id="printInterpretation"></div>
             </div>
@@ -511,7 +511,7 @@
               <button class="btn btn-success" onclick="fichePhotoAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-photo-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="fichePhotoModifier()"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="fichePhotoSupprimer()"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
             </div>
           </div>
           <div class="photos-grid" id="photosGrid"></div>
@@ -531,7 +531,7 @@
           <p class="fiche-validation-date" id="ficheValideDate"></p>
           <div class="action-buttons" style="margin-top:.9rem;">
             <button class="btn btn-success" onclick="ficheValider()"><i class="fas fa-circle-check"></i> <span data-lang-key="b-valider-fiche">Valider et sauvegarder la fiche</span></button>
-            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+            <button class="btn btn-primary" onclick="ficheSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
           </div>
         </div>
 
@@ -594,7 +594,7 @@
                       <div class="spec-add">
                         <input type="text" id="specInput" placeholder="Nouvelle spécialité..." onkeydown="if(event.key==='Enter') profSpecAjouter()">
                         <button class="btn btn-success" onclick="profSpecAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
-                        <button class="btn btn-primary" onclick="profSpecSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+                        <button class="btn btn-primary" onclick="profSpecSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
                       </div>
                     </div>
                   </div>
@@ -616,12 +616,32 @@
               <button class="btn btn-success" onclick="profAjouter()"><i class="fas fa-plus"></i> <span data-lang-key="b-ajouter">Ajouter</span></button>
               <button class="btn btn-accent" onclick="profModifier()"><i class="fas fa-pen"></i> <span data-lang-key="b-modifier">Modifier</span></button>
               <button class="btn btn-danger" onclick="profSupprimer()"><i class="fas fa-trash"></i> <span data-lang-key="b-supprimer">Supprimer</span></button>
-              <button class="btn btn-primary" onclick="profSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+              <button class="btn btn-primary" onclick="profSauvegarder()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
               <button class="btn btn-secondary" onclick="profVider()"><i class="fas fa-eraser"></i> <span data-lang-key="b-vider">Vider</span></button>
             </div>
           </div>
           <div class="gest-list">
             <div class="gest-list-title"><i class="fas fa-list"></i> <span data-lang-key="fiche-liste">Liste des profils stagiaires</span></div>
+            <div class="prof-groupe-tools">
+              <label class="prof-groupe-toggle" title="Classer les stagiaires en groupes de spécialité, puis de semestre">
+                <input type="checkbox" id="profGrouper" checked onchange="profRender()">
+                <span><i class="fas fa-layer-group"></i> Grouper par spécialité et semestre</span>
+              </label>
+              <div class="prof-groupe-filtres">
+                <select id="profFiltreSpec" onchange="profRender()" title="Afficher une seule spécialité">
+                  <option value="">Toutes les spécialités</option>
+                </select>
+                <select id="profFiltreSem" onchange="profRender()" title="Afficher un seul semestre">
+                  <option value="">Tous les semestres</option>
+                  <option value="S1">S1 — Semestre 1</option>
+                  <option value="S2">S2 — Semestre 2</option>
+                  <option value="S3">S3 — Semestre 3</option>
+                  <option value="S4">S4 — Semestre 4</option>
+                  <option value="S5">S5 — Semestre 5</option>
+                  <option value="__none__">Semestre non renseigné</option>
+                </select>
+              </div>
+            </div>
             <div class="results-table-container">
               <table class="results-table gest-table prof-table">
                 <thead>
@@ -684,7 +704,7 @@
         </div>
 
         <div class="action-buttons">
-          <button class="btn btn-primary" onclick="notationSauver()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Sauvegarder</span></button>
+          <button class="btn btn-primary" onclick="notationSauver()"><i class="fas fa-save"></i> <span data-lang-key="b-sauvegarder">Enregistrer</span></button>
           <button class="btn btn-secondary" onclick="notationCalculer()"><i class="fas fa-calculator"></i> <span data-lang-key="b-calculer">Calculer le total</span></button>
           <button class="btn btn-primary" onclick="notationRendreEnTete(); window.print()"><i class="fas fa-print"></i> <span data-lang-key="b-imprimer">Imprimer la grille</span></button>
         </div>

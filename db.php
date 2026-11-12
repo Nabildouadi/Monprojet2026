@@ -2,23 +2,19 @@
 /**
  * Connexion à la base de données via PDO
  * Plateforme pédagogique - INSFP EL HIDHAB 2026
+ *
+ * Fonctionne avec :
+ *   - le serveur portable fourni (serveur\mariadb, port 3307)
+ *   - un XAMPP / WAMP / Laragon classique (port 3306)
+ *   - un serveur distant (variables d'environnement INSFP_DB_*)
  */
 
-$host = 'localhost';
-$db   = 'insfp_projets';
-$user = 'root'; // Par défaut sur XAMPP/WAMP
-$pass = '';     // Par défaut sur XAMPP/WAMP
-$charset = 'utf8mb4';
+require_once __DIR__ . '/config-db.php';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
+$config = insfp_db_config();
 
 try {
-     $pdo = new PDO($dsn, $user, $pass, $options);
+     $pdo = insfp_db_connect($config, $config['db']);
 
      // Migration automatique : colonne JSON pour conserver toute la fiche projet
      try {
@@ -31,7 +27,10 @@ try {
      }
 } catch (\PDOException $e) {
      header('Content-Type: application/json');
-     echo json_encode(['error' => 'Erreur de connexion : ' . $e->getMessage()]);
+     echo json_encode([
+         'error' => 'Erreur de connexion : ' . $e->getMessage(),
+         'hint'  => "Démarrez le serveur MySQL puis ouvrez install.php. Sur XAMPP/WAMP : port 3306. Version portable : lancez Lancer-Les-Projets.bat.",
+     ]);
      exit;
 }
 ?>

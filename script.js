@@ -399,7 +399,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'b-ajouter': 'Ajouter',
         'b-modifier': 'Modifier',
         'b-supprimer': 'Supprimer',
-        'b-sauvegarder': 'Sauvegarder',
+        'b-sauvegarder': 'Enregistrer',
         'b-vider': 'Vider',
         'b-photo': 'Photo',
         'b-retirer': 'Retirer',
@@ -469,7 +469,7 @@ const STU_KEY = 'ps_stagiaire_tel';
         'b-ajouter': 'Ajouter',
         'b-modifier': 'Modifier',
         'b-supprimer': 'Supprimer',
-        'b-sauvegarder': 'Sauvegarder',
+        'b-sauvegarder': 'Enregistrer',
         'nav-notation': 'Notation du projet',
         'h-notation': 'Notation du projet',
         'notation-info': 'Sélectionnez un projet : le nom du projet et le nom des stagiaires sont remplis automatiquement. Saisissez la note obtenue sur 20 pour chaque critère — le total et l\'appréciation se calculent automatiquement.',
@@ -1502,6 +1502,32 @@ const STU_KEY = 'ps_stagiaire_tel';
       return (raw || '').replace(/[\s.-]/g, '');
     }
 
+    // ---- Classement des stagiaires par groupe (spécialité + semestre) ----
+    function profComparer(a, b) {
+      const na = ((a.nom || '') + ' ' + (a.prenom || '')).toLocaleLowerCase('fr');
+      const nb = ((b.nom || '') + ' ' + (b.prenom || '')).toLocaleLowerCase('fr');
+      return na.localeCompare(nb, 'fr', { sensitivity: 'base', numeric: true });
+    }
+
+    function profRemplirFiltres() {
+      const sel = document.getElementById('profFiltreSpec');
+      if (!sel) return;
+      const ancienne = sel.value;
+      sel.innerHTML = '<option value="">Toutes les spécialités</option>';
+      specialiteList.forEach(function(s) {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        sel.appendChild(opt);
+      });
+      const sans = document.createElement('option');
+      sans.value = '__none__';
+      sans.textContent = 'Sans spécialité';
+      sel.appendChild(sans);
+      const valide = Array.prototype.some.call(sel.options, function(o) { return o.value === ancienne; });
+      sel.value = valide ? ancienne : '';
+    }
+
     function profAutoPass() {
       const phone = profNormalizePhone(document.getElementById('profPhone').value);
       document.getElementById('profPass').value = /^0[0-9]{9}$/.test(phone) ? phone.slice(-4) : '';
@@ -1533,6 +1559,7 @@ const STU_KEY = 'ps_stagiaire_tel';
       zone.innerHTML = '';
       if (!specialiteList.length) {
         zone.innerHTML = '<span style="font-size:.75rem;color:var(--text-muted);font-style:italic;">Aucune spécialité — ajoutez-en une ci-dessous.</span>';
+        profRemplirFiltres();
         return;
       }
       specialiteList.forEach(function(s, i) {
@@ -1544,6 +1571,7 @@ const STU_KEY = 'ps_stagiaire_tel';
           '<button class="btn btn-danger" title="Supprimer" onclick="profSpecSupprimer(' + i + ')"><i class="fas fa-times"></i></button>';
         zone.appendChild(chip);
       });
+      profRemplirFiltres();
     }
 
     async function profSpecPersist() {
@@ -1671,25 +1699,84 @@ const STU_KEY = 'ps_stagiaire_tel';
 
     function profRender() {
       const tbody = document.getElementById('profBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       const empty = document.getElementById('profEmpty');
+      const counter = document.getElementById('profCounter');
+      const meta = document.getElementById('profMeta');
+      const caseGrouper = document.getElementById('profGrouper');
+      const estGroupe = !caseGrouper || caseGrouper.checked;
+      const filtreSpec = (document.getElementById('profFiltreSpec') || {}).value || '';
+      const filtreSem = (document.getElementById('profFiltreSem') || {}).value || '';
+
       if (profileList.length === 0) {
-        empty.style.display = 'block';
-        document.getElementById('profCounter').textContent = '';
-        document.getElementById('profMeta').innerHTML = '<span><i class="fas fa-info-circle"></i> Aucun profil — remplissez la fiche puis cliquez sur « Ajouter ».</span>';
+        if (empty) {
+          empty.textContent = 'Aucun profil stagiaire enregistré pour le moment.';
+          empty.style.display = 'block';
+        }
+        if (counter) counter.textContent = '';
+        if (meta) meta.innerHTML = '<span><i class="fas fa-info-circle"></i> Aucun profil — remplissez la fiche puis cliquez sur « Ajouter ».</span>';
         return;
       }
-      empty.style.display = 'none';
-      document.getElementById('profCounter').textContent = 'Total : ' + profileList.length + ' profil(s) stagiaire(s)';
+
+      // Filtres : spécialité puis semestre
+      const filtres = profileList.filter(function(p) {
+        const spec = (p.specialite || '').trim();
+        if (filtreSpec === '__none__') {
+          if (spec !== '') return false;
+        } else if (filtreSpec && spec !== filtreSpec) {
+          return false;
+        }
+        if (filtreSem === '__none__') {
+          if (p.semestre) return false;
+        } else if (filtreSem && p.semestre !== filtreSem) {
+          return false;
+        }
+        return true;
+      });
+
+      const total = profileList.length;
+      if (counter) {
+        counter.textContent = filtres.length === total
+          ? 'Total : ' + total + ' profil(s) stagiaire(s)'
+          : 'Affichés : ' + filtres.length + ' / ' + total + ' profil(s) stagiaire(s)';
+      }
+
+      // Statistiques (sur les profils affichés)
       const parSem = {};
       PROFILE_SEMESTRES.forEach(function(s) { parSem[s] = 0; });
-      profileList.forEach(function(p, idx) {
+      const specs = {};
+      filtres.forEach(function(p) {
         if (parSem[p.semestre] !== undefined) parSem[p.semestre]++;
+        const spec = (p.specialite || '').trim() || 'Sans spécialité';
+        specs[spec] = (specs[spec] || 0) + 1;
+      });
+      if (meta) {
+        meta.innerHTML = '<span><i class="fas fa-users"></i> Stagiaires : <b>' + filtres.length + '</b></span>' +
+          '<span><i class="fas fa-layer-group"></i> Groupes : <b>' + Object.keys(specs).length + '</b></span>' +
+          PROFILE_SEMESTRES.map(function(s) {
+            return '<span><i class="fas fa-calendar-alt"></i> ' + s + ' : <b>' + parSem[s] + '</b></span>';
+          }).join('');
+      }
+
+      if (filtres.length === 0) {
+        if (empty) {
+          empty.textContent = 'Aucun stagiaire ne correspond aux filtres sélectionnés.';
+          empty.style.display = 'block';
+        }
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      let numero = 0;
+      const ajouterLigne = function(p) {
+        numero++;
         const tr = document.createElement('tr');
         tr.dataset.id = p.id;
+        tr.className = 'prof-row';
         if (profileEditingId === p.id) tr.classList.add('selected');
         tr.innerHTML =
-          '<td>' + (idx + 1) + '</td>' +
+          '<td>' + numero + '</td>' +
           '<td class="prof-thumb-ok">' + (p.photo ? '<img class="prof-photo-thumb" src="' + p.photo + '" alt="photo">' : '<i class="fas fa-user-slash"></i>') + '</td>' +
           '<td><strong>' + profEscapeHtml(p.nom) + '</strong> ' + profEscapeHtml(p.prenom) + '</td>' +
           '<td>' + profEscapeHtml(p.phone) + '</td>' +
@@ -1698,11 +1785,59 @@ const STU_KEY = 'ps_stagiaire_tel';
           '<td>' + (p.semestre ? '<span class="prof-sem-badge ' + p.semestre.toLowerCase() + '">' + p.semestre + '</span>' : '—') + '</td>';
         tr.addEventListener('click', function() { profFill(p); });
         tbody.appendChild(tr);
+      };
+
+      const titreGroupe = function(icone, texte, nombre, classe) {
+        const tr = document.createElement('tr');
+        tr.className = classe;
+        tr.innerHTML = '<td colspan="7"><span class="prof-group-title"><i class="fas ' + icone + '"></i> ' +
+          profEscapeHtml(texte) + '</span><span class="prof-group-count">' + nombre + ' stagiaire' + (nombre > 1 ? 's' : '') + '</span></td>';
+        tbody.appendChild(tr);
+      };
+
+      if (!estGroupe) {
+        filtres.slice().sort(profComparer).forEach(ajouterLigne);
+        return;
+      }
+
+      // Regroupement par spécialité, puis par semestre à l'intérieur du groupe.
+      const groupes = {};
+      filtres.forEach(function(p) {
+        const spec = (p.specialite || '').trim() || 'Sans spécialité';
+        if (!groupes[spec]) groupes[spec] = [];
+        groupes[spec].push(p);
       });
-      const chips = PROFILE_SEMESTRES.map(function(s) {
-        return '<span><i class="fas fa-calendar-alt"></i> ' + s + ' : <b>' + parSem[s] + '</b></span>';
-      }).join('');
-      document.getElementById('profMeta').innerHTML = '<span><i class="fas fa-users"></i> Stagiaires : <b>' + profileList.length + '</b></span>' + chips;
+      const nomsGroupes = Object.keys(groupes).sort(function(a, b) {
+        if (a === 'Sans spécialité') return 1;
+        if (b === 'Sans spécialité') return -1;
+        return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+      });
+
+      nomsGroupes.forEach(function(spec) {
+        const membres = groupes[spec].slice().sort(profComparer);
+        titreGroupe('fa-graduation-cap', spec, membres.length, 'prof-group-head');
+
+        const parSemestre = {};
+        membres.forEach(function(p) {
+          const sem = PROFILE_SEMESTRES.indexOf(p.semestre) !== -1 ? p.semestre : '__none__';
+          if (!parSemestre[sem]) parSemestre[sem] = [];
+          parSemestre[sem].push(p);
+        });
+        const ordreSemestres = PROFILE_SEMESTRES.concat(['__none__']);
+        ordreSemestres.forEach(function(sem) {
+          const liste = parSemestre[sem];
+          if (!liste || !liste.length) return;
+          const badge = sem === '__none__'
+            ? '<span class="prof-sem-badge none">Semestre non renseigné</span>'
+            : '<span class="prof-sem-badge ' + sem.toLowerCase() + '">' + sem + '</span>';
+          const tr = document.createElement('tr');
+          tr.className = 'prof-group-sub';
+          tr.innerHTML = '<td colspan="7"><span class="prof-group-subtitle">' + badge +
+            '<b>' + liste.length + '</b> stagiaire' + (liste.length > 1 ? 's' : '') + '</span></td>';
+          tbody.appendChild(tr);
+          liste.forEach(ajouterLigne);
+        });
+      });
     }
 
     function profFill(p) {
@@ -3948,9 +4083,14 @@ const STU_KEY = 'ps_stagiaire_tel';
     // a été modifiée depuis la dernière validation.
     function ficheEmpreinte(p) {
       if (!p) return '';
-      const txt = function(arr) { return (arr || []).map(function(x) { return x && x.texte ? x.texte : ''; }); };
-      const mem = (p.membres || []).map(function(m) { return m ? ((m.nom || '') + ' ' + (m.prenom || '')).trim() : ''; });
-      const pho = (p.photos || []).map(function(x) { return x ? String(x).length + ':' + String(x).slice(-28) : ''; });
+      const txt = function(arr) {
+        return (arr || []).map(function(x) { return x && x.texte ? x.texte : ''; })
+          .filter(function(t) { return String(t).trim() !== ''; });
+      };
+      const mem = (p.membres || []).map(function(m) { return m ? ((m.nom || '') + ' ' + (m.prenom || '')).trim() : ''; })
+        .filter(function(t) { return t !== ''; });
+      const pho = (p.photos || []).map(function(x) { return x ? String(x).length + ':' + String(x).slice(-28) : ''; })
+        .filter(function(t) { return t !== ''; });
       return JSON.stringify([
         String(p.nom || ''), mem, txt(p.objectifs), txt(p.etapes), txt(p.materiel), txt(p.reactifs),
         String(p.methode || ''), String(p.resultat || ''), String(p.interpretation || ''), pho
@@ -4033,7 +4173,6 @@ const STU_KEY = 'ps_stagiaire_tel';
       const p = ficheCourant();
       m.value = p && p.methode ? p.methode : '';
       m.disabled = !p;
-      m.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
       const pm = document.getElementById('printMethode');
       if (pm) pm.textContent = m.value;
       const rf = document.getElementById('ficheResultat');
@@ -4041,12 +4180,10 @@ const STU_KEY = 'ps_stagiaire_tel';
       if (rf) {
         rf.value = p && p.resultat ? p.resultat : '';
         rf.disabled = !p;
-        rf.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
       }
       if (ri) {
         ri.value = p && p.interpretation ? p.interpretation : '';
         ri.disabled = !p;
-        ri.readOnly = !!(typeof estStagiaire === 'function' && estStagiaire());
       }
       ficheMajResultat();
       ficheRendrePhotos();

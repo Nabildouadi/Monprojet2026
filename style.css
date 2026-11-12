@@ -1144,6 +1144,62 @@
     .prof-sem-badge.s3 { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
     .prof-sem-badge.s4 { background: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
     .prof-sem-badge.s5 { background: #ffe4e6; color: #be123c; border-color: #fecdd3; }
+    .prof-sem-badge.none { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+
+    /* ---- Classement des stagiaires par groupe (spécialité + semestre) ---- */
+    .prof-groupe-tools {
+      display: flex; flex-wrap: wrap; gap: .55rem 1rem; align-items: center;
+      justify-content: space-between; margin: .15rem 0 .75rem;
+      padding: .55rem .7rem; border: 1px solid var(--border-color);
+      border-radius: 12px; background: var(--bg-gradient-1);
+    }
+    .prof-groupe-toggle {
+      display: inline-flex; align-items: center; gap: .45rem; cursor: pointer;
+      font-size: .78rem; font-weight: 800; color: var(--text-secondary);
+    }
+    .prof-groupe-toggle input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+    .prof-groupe-toggle i { color: var(--primary); }
+    .prof-groupe-filtres { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .prof-groupe-filtres select {
+      padding: .38rem .55rem; border-radius: 9px; border: 1px solid var(--border-color);
+      background: var(--card-bg); color: var(--text-primary); font-size: .76rem;
+      font-weight: 700; font-family: var(--font-primary); cursor: pointer; max-width: 240px;
+    }
+    .prof-group-head td {
+      background: linear-gradient(135deg, rgba(14,165,233,.16), rgba(29,78,216,.07));
+      border-top: 2px solid rgba(14,165,233,.4);
+      padding: .55rem .7rem !important;
+    }
+    .prof-group-head .prof-group-title {
+      display: inline-flex; align-items: center; gap: .45rem;
+      font-size: .82rem; font-weight: 900; color: var(--primary);
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .prof-group-count {
+      display: inline-block; margin-left: .65rem; font-size: .7rem; font-weight: 800;
+      padding: .12rem .55rem; border-radius: 10px; background: var(--card-bg);
+      border: 1px solid var(--border-color); color: var(--text-secondary);
+    }
+    .prof-group-sub td {
+      background: var(--card-bg-hover);
+      padding: .32rem .7rem .32rem 1.7rem !important;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .prof-group-subtitle {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .75rem; font-weight: 700; color: var(--text-secondary);
+    }
+    .prof-group-subtitle b { color: var(--text-primary); }
+    tr.prof-row { cursor: pointer; }
+    @media print {
+      .prof-groupe-tools { display: none !important; }
+      .prof-group-head td, .prof-group-sub td {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        break-after: avoid;
+      }
+      tr.prof-row { break-inside: avoid; }
+    }
+
     .spec-manager { margin-top: .45rem; }
     .spec-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .5rem; }
     .spec-chip {
@@ -1202,19 +1258,13 @@
     .arch-stat b { display: block; font-size: 1.35rem; font-weight: 800; color: var(--primary); }
     .arch-stat span { font-size: .7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
 
-    /* ===== Mode stagiaire : lecture seule ===== */
-    body.role-stu .fiche-add-row,
-    body.role-stu .member-actions,
-    body.role-stu .fiche-prog-wrap,
-    body.role-stu .fiche-saved-flash,
-    body.role-stu #ficheMethode { display: none !important; }
+    /* ===== Mode stagiaire : la fiche projet est modifiable =====
+       Les boutons Ajouter / Modifier / Supprimer / Enregistrer et la
+       saisie en ligne restent disponibles pour le stagiaire connecté. */
     body.role-stu .fiche-export .btn-accent { display: none !important; }
-    body.role-stu #ficheMethode { display: none !important; }
-    body.role-stu .data-form-grid input,
-    body.role-stu .data-form-grid select { pointer-events: none; opacity: .75; }
     body.role-stu .fiche-block-head::after {
-      content: 'Mode consultation'; font-size: .66rem; font-weight: 800; margin-left: auto;
-      padding: .1rem .5rem; border-radius: 10px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;
+      content: 'Espace stagiaire'; font-size: .66rem; font-weight: 800; margin-left: auto;
+      padding: .1rem .5rem; border-radius: 10px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;
     }
 
     /* ===== Fiche projet ===== */
@@ -1267,7 +1317,6 @@
     .member-slot.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
     .fiche-block-tools { display: flex; gap: .35rem; flex-wrap: wrap; margin-left: auto; }
     .fiche-block-tools .btn { padding: .3rem .6rem; font-size: .72rem; }
-    body.role-stu .fiche-block-tools { display: none !important; }
     body.role-stu .fiche-block.photos .fiche-block-tools { display: flex !important; }
 
     /* ===== Page Notation ===== */
@@ -1860,13 +1909,7 @@
       border-color: #0891b2;
       box-shadow: 0 0 0 4px rgba(8,145,178,.14);
     }
-    /* Élèves : consultation seule */
-    body.role-stu #ficheResultat,
-    body.role-stu #ficheInterpretation {
-      pointer-events: none;
-      background: #f8fafc;
-      color: #334155;
-    }
+    /* Élèves : la fiche reste entièrement modifiable */
     .fiche-print-only { display: none; }
 
     @media (max-width: 860px) {
@@ -2083,11 +2126,7 @@
     @keyframes ficheCible { 0% { box-shadow: 0 0 0 0 rgba(14,165,233,.6); } 100% { box-shadow: 0 0 0 16px rgba(14,165,233,0); } }
     #page-fiche .fiche-block.fiche-cible { border-color: var(--primary); animation: ficheCible 1.4s ease; }
 
-    /* ---- Mode stagiaire : pas d'édition dynamique ---- */
-    body.role-stu .fiche-drag,
-    body.role-stu .fiche-chips,
-    body.role-stu .fiche-filter-wrap,
-    body.role-stu .fiche-ico-btn { display: none !important; }
+    /* ---- Mode stagiaire : édition dynamique autorisée ---- */
 
     @media (max-width: 600px) {
       #page-fiche .fiche-ring { width: 42px; height: 42px; }
@@ -2148,7 +2187,6 @@
     #page-fiche .fiche-validation-item.done i { color: #16a34a; }
     #page-fiche .fiche-validation-item.done em { color: #15803d; }
     #page-fiche .fiche-validation-date { margin: .75rem 0 0; font-size: .74rem; color: var(--text-muted); }
-    body.role-stu .fiche-block-validation .action-buttons { display: none !important; }
 
     @media print {
       #page-fiche .resultat-panel-tools,

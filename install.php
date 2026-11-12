@@ -2,12 +2,13 @@
 /**
  * Script d'installation automatique de la base de données et des tables
  */
-$host = 'localhost';
-$user = 'root';
-$pass = '';
+require_once __DIR__ . '/config-db.php';
+
+$config = insfp_db_config();
 
 try {
-    $pdo = new PDO("mysql:host=$host", $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    // Connexion sans base : database.sql crée lui-même insfp_projets.
+    $pdo = insfp_db_connect($config, null);
 
     // Lecture et exécution du fichier database.sql
     $sql = file_get_contents(__DIR__ . '/database.sql');
@@ -21,6 +22,14 @@ try {
         }
     } catch (PDOException $migration) {
         // Ignorer : la base vient d'être créée avec la colonne.
+    }
+
+    // Les identifiants sont stockés sous forme d'empreintes SHA-256 (64 caractères) :
+    // on agrandit la colonne des anciennes installations trop courtes.
+    try {
+        $pdo->exec("ALTER TABLE `insfp_projets`.`users` MODIFY `username` VARCHAR(128) NOT NULL");
+    } catch (PDOException $migrationUser) {
+        // Ignorer si la table n'existe pas encore.
     }
 
     // Insertion d'un compte admin par défaut (si inexistant)
@@ -74,14 +83,19 @@ try {
         <div class='card'>
             <h1>Installation Réussie !</h1>
             <p>La base de données MySQL a été configurée avec succès pour l'application <strong>Les Projets des Stagiaires</strong> (INSFP El Hidhab 2026).</p>
-            <p style='font-size:0.85rem; color:#64748b; margin-top:1rem;'>Identifiant professeur par défaut : <code>profdouadi</code> / Mot de passe : <code>admin2026</code></p>
+            <p style='font-size:0.85rem; color:#64748b; margin-top:1rem;'>Le compte professeur a été créé. Connectez-vous avec les identifiants qui vous ont été communiqués par l'administration.</p>
             <a href='index.html'>Accéder à l'application</a>
         </div>
     </body>
     </html>";
 
 } catch (PDOException $e) {
-    echo "<h2>Erreur lors de l'installation :</h2><pre>" . $e->getMessage() . "</pre>";
-    echo "<p>Vérifiez que votre serveur MySQL (XAMPP/WAMP) est bien démarré et que les identifiants dans <code>install.php</code> sont corrects.</p>";
+    echo "<div style='font-family:Arial,sans-serif;max-width:640px;margin:3rem auto;padding:2rem;border-radius:12px;background:#fff5f5;border:1px solid #fecaca;color:#7f1d1d'>";
+    echo "<h2 style='margin-top:0'>Erreur lors de l'installation</h2><pre style='white-space:pre-wrap'>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    echo "<p>Vérifiez que le serveur MySQL / MariaDB est bien démarré :</p>";
+    echo "<ul><li><strong>Version portable</strong> : lancez <code>Lancer-Les-Projets.bat</code> (le serveur inclus démarre tout seul).</li>";
+    echo "<li><strong>XAMPP / WAMP / Laragon</strong> : démarrez MySQL, puis ouvrez <code>install.php</code> depuis le serveur.</li></ul>";
+    echo "<p style='font-size:0.85rem;color:#64748b'>Ports essayés : " . implode(', ', insfp_db_ports($config)) . "</p>";
+    echo "</div>";
 }
 ?>

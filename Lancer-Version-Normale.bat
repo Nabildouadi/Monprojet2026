@@ -3,6 +3,18 @@ setlocal EnableExtensions
 title Les Projets des Stagiaires - Version normale (PHP + MySQL)
 cd /d "%~dp0"
 
+rem ---- Serveur portable PHP + MariaDB fourni avec le projet ----
+if exist "%~dp0serveur\php\php.exe" if exist "%~dp0serveur\mariadb\bin\mysqld.exe" (
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0serveur\serveur.ps1" -Action Start
+  if errorlevel 1 (
+    echo.
+    echo   Demarrage automatique impossible. Voir serveur\mysqld.err
+    echo.
+    pause
+  )
+  exit /b 0
+)
+
 call :chercher_php
 if not defined PHP goto :sansphp
 
@@ -19,6 +31,8 @@ if not errorlevel 1 (
 set "MYSQL=non"
 netstat -an 2>nul | findstr /c:":3306 " >nul
 if not errorlevel 1 set "MYSQL=oui"
+netstat -an 2>nul | findstr /c:":3307 " >nul
+if not errorlevel 1 set "MYSQL=oui"
 
 cls
 echo ============================================================
@@ -28,7 +42,7 @@ echo.
 echo   PHP     : %PHP%
 echo   Adresse : http://127.0.0.1:%PORT%/index.html
 if "%MYSQL%"=="oui" (
-  echo   MySQL   : detecte sur le port 3306
+  echo   MySQL   : detecte ^(ports 3306 / 3307^)
 ) else (
   echo   MySQL   : NON detecte - demarrez XAMPP / WAMP / Laragon
 )
@@ -42,7 +56,7 @@ echo   Ouverture du navigateur...
 ping -n 3 127.0.0.1 >nul 2>nul
 start "" "http://127.0.0.1:%PORT%/index.html"
 
-"%PHP%" -S 127.0.0.1:%PORT%
+"%PHP%" -S 127.0.0.1:%PORT% -t "%~dp0"
 
 echo.
 echo ------------------------------------------------------------

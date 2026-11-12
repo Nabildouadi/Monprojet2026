@@ -5,7 +5,7 @@ USE `insfp_projets`;
 -- Table Utilisateurs (Administrateur / Professeur)
 CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(50) NOT NULL UNIQUE,
+    `username` VARCHAR(128) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `prof_name` VARCHAR(100) DEFAULT 'Douadi Nabil'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

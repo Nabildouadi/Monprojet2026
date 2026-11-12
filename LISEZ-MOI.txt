@@ -47,11 +47,24 @@ FICHE PROJET DYNAMIQUE (9 sections numerotees)
   9  Validation et sauvegarde
 
   Chaque section dispose des boutons Ajouter / Modifier /
-  Supprimer / Sauvegarder, d'une saisie en ligne, du
+  Supprimer / Enregistrer, d'une saisie en ligne, du
   glisser-deposer pour reordonner, d'un filtre, de suggestions,
   d'un bouton Annuler apres une suppression et de sections
   repliables. Une barre de progression, un sommaire cliquable et
   une validation finale suivent l'avancement de la fiche.
+  Le stagiaire connecte peut creer, modifier et enregistrer sa
+  propre fiche : les boutons Ajouter / Modifier / Supprimer /
+  Enregistrer sont actifs dans son espace.
+
+CLASSEMENT DES STAGIAIRES PAR GROUPE
+  Dans "Profile Stagiaire", la liste peut etre classee
+  automatiquement par SPECIALITE puis par SEMESTRE (S1 a S5).
+  Des en-tetes de groupe affichent le nombre de stagiaires, des
+  sous-totaux par semestre sont calcules, et deux filtres
+  permettent d'afficher une specialite ou un semestre precis.
+  La case "Grouper par specialite et semestre" permet de revenir
+  a une liste simple. Le classement fonctionne aussi a
+  l'impression et en mode portable.
 
 LOGOS 3D ANIMES
   Les deux logos (en-tete et page d'accueil) passent en relief 3D
@@ -59,59 +72,73 @@ LOGOS 3D ANIMES
   et un zoom au survol. L'animation s'arrete a l'impression et si
   Windows demande de reduire les animations.
 
+MODE NORMAL SANS INSTALLATION
+  Le dossier "serveur" contient PHP 8.3 et MariaDB 10.11
+  portables. Un double-clic sur Lancer-Les-Projets.bat demarre la
+  vraie base MySQL et le serveur PHP : aucune installation dans
+  Windows, aucun droit administrateur, tout reste sur la cle USB.
+  La base "insfp_projets" est deja installee et prete a l'emploi.
+
 
 ================================================================
  1) MODE NORMAL : PHP + MYSQL (recommande sur PC)
 ================================================================
 
-PREREQUIS
-  - XAMPP (ou WAMP) installe, avec PHP 7.4 ou plus recent
-  - MySQL / MariaDB demarre (bouton Start dans XAMPP)
+AUCUNE INSTALLATION NÉCESSAIRE
+  Le dossier "serveur" contient un PHP 8.3 et un MariaDB 10.11
+  portables, déjà prêts :
+      serveur\php       -> PHP 8.3 (pdo_mysql, mbstring, gd...)
+      serveur\mariadb   -> serveur MySQL / MariaDB
+      serveur\data      -> la base "insfp_projets" déjà installée
+  Rien n'est installé dans Windows, aucun droit administrateur :
+  tout reste dans le dossier du projet (clé USB comprise).
 
-LANCEMENT RAPIDE (recommande)
+LANCEMENT RAPIDE (recommandé)
   Double-cliquez sur :  Lancer-Les-Projets.bat
   Ce lanceur choisit tout seul le bon mode :
-    - PHP + MySQL detectes  -> MODE NORMAL
-    - sinon                 -> MODE PORTABLE (sans installation)
-  Il detecte PHP dans XAMPP, WAMP, Laragon, le dossier local
-  ou le PATH, choisit un port libre (8080, puis 8081...)
-  et ouvre le navigateur automatiquement.
+    - serveur portable présent -> MODE NORMAL (MySQL)
+    - sinon                    -> MODE PORTABLE (sans installation)
+  Il démarre MariaDB (port 3307), lance PHP sur un port libre
+  (8080, puis 8081...), ouvre le navigateur et affiche l'adresse
+  exacte dans la fenêtre noire.
+  Laissez la fenêtre noire OUVERTE pendant l'utilisation :
+  la fermer arrête le site et la base.
 
-ETAPE 1 - INSTALLER LA BASE
-  Double-cliquez sur :  Installer-Base.bat
-  Le navigateur s'ouvre sur install.php et affiche
-  "Installation Reussie !".
-  La base "insfp_projets" et toutes les tables sont creees.
+ÉTAPE 1 - INSTALLER LA BASE (une seule fois)
+  La base est déjà installée dans serveur\data.
+  Pour la recréer ou la réparer :
+      double-cliquez sur  Installer-Base.bat
+  Le navigateur affiche "Installation Réussie !" et les tables
+  (users, specialites, stagiaires, projets, projet_*, settings)
+  sont créées ou mises à jour.
 
-  Equivalent manuel :
-      http://localhost/votre-dossier/install.php
-
-ETAPE 2 - LANCER L'APPLICATION
+ÉTAPE 2 - LANCER L'APPLICATION
   Double-cliquez sur :  Lancer-Les-Projets.bat
   (ou directement sur Lancer-Version-Normale.bat)
   Le navigateur s'ouvre sur :
       http://127.0.0.1:8080/index.html
-  Si le port 8080 est deja pris, le lanceur utilise 8081, 8082...
-  L'adresse exacte est affichee dans la fenetre noire.
-  Laissez la fenetre noire ouverte pendant l'utilisation
-  (c'est le serveur PHP). Fermez-la pour arreter le serveur.
+  Si le port 8080 est déjà pris, le lanceur utilise 8081, 8082...
 
-  Avec XAMPP, vous pouvez aussi copier tout le dossier dans
-  C:\xampp\htdocs et ouvrir :
-      http://localhost/NOM-DU-DOSSIER/index.html
+  Avec XAMPP / WAMP / Laragon, le même dossier fonctionne aussi :
+  démarrez MySQL (port 3306), copiez le dossier dans htdocs et
+  ouvrez http://localhost/NOM-DU-DOSSIER/index.html
+  L'application détecte alors automatiquement le port 3306.
 
 IDENTIFIANTS PROFESSEUR (administrateur)
   Identifiant : profdouadi
   Mot de passe : admin2026
   (modifiable dans « Paramètres » > « Sécurité — Modifier le mot de passe »)
 
-REGLAGES DE CONNEXION MYSQL
-  Fichier db.php :
-      hote         : localhost
-      base         : insfp_projets
-      utilisateur  : root
-      mot de passe : (vide par defaut sous XAMPP/WAMP)
-  Modifiez ces valeurs si votre MySQL est protege par un mot de passe.
+RÉGLAGES DE CONNEXION MYSQL
+  Fichier config-db.php (aucune modification nécessaire) :
+      hôte          : 127.0.0.1
+      ports essayés : 3307 (serveur portable), puis 3306 (XAMPP)
+      base          : insfp_projets
+      utilisateur   : root
+      mot de passe  : (vide)
+  Pour un serveur protégé, définissez les variables
+  d'environnement INSFP_DB_HOST / INSFP_DB_PORT / INSFP_DB_USER /
+  INSFP_DB_PASS / INSFP_DB_NAME avant de lancer le serveur.
 
 
 ================================================================
